@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { StaffSnapshot, TicketSnapshot } from '../../src/shared/contracts.ts';
 import { takeTicket } from '../../src/server/domain/tickets.ts';
+import { buildDisplay, buildTicket } from '../../src/server/realtime/snapshots.ts';
 import { seedQueue, setup, staffAt } from './helpers.ts';
 
 async function world() {
@@ -292,5 +293,55 @@ describe('role guards and Origin', () => {
     const res = await w.req('/api/stream/display');
     expect(res.status).toBe(200);
     await res.body?.cancel();
+  });
+});
+
+describe('snapshot timezone, ticket origin and per-service waiting', () => {
+  it('follows an admin timezone change in display, ticket and staff snapshots', async () => {
+    const w = await world();
+    const staff = await staffAt(w, 'sari', w.loket1.id);
+    expect(buildDisplay(w.db, w.clock.t).timeZone).toBe('Asia/Jakarta');
+    const res = await w.adminCall('/api/admin/settings', 'PUT', { businessName: 'Giliran', timezone: 'Asia/Makassar', nearThreshold: 3 });
+    expect(res.status).toBe(200);
+    expect(buildDisplay(w.db, w.clock.t).timeZone).toBe('Asia/Makassar');
+    expect(buildTicket(w.db, w.clock.t, 'nope')).toMatchObject({ state: 'not_found', timeZone: 'Asia/Makassar' });
+    const sess = await w.req('/api/staff/counter', { method: 'POST', body: { counterId: w.loket1.id }, cookie: staff });
+    expect(((await sess.json()) as StaffSnapshot).timeZone).toBe('Asia/Makassar');
+  });
+
+  it('adds serviceId and takenAt to every ticket state', async () => {
+    const w = await world();
+    const cookie = await staffAt(w, 'sari', w.loket1.id);
+    const t1 = w.issue(w.a.id);
+    const t2 = w.issue(w.b.id);
+    const t3 = w.issue(w.a.id);
+    expect(buildTicket(w.db, w.clock.t, t2.token)).toMatchObject({ state: 'waiting', serviceId: w.b.id, takenAt: w.clock.t - 1000 });
+    await w.post(cookie, 'call-next', { expectedCurrentTicketId: null });
+    expect(buildTicket(w.db, w.clock.t, t1.token)).toMatchObject({ state: 'called', serviceId: w.a.id, takenAt: w.clock.t - 2000, timeZone: 'Asia/Jakarta' });
+    const first = w.db.get<{ id: number }>('SELECT id FROM tickets WHERE public_token = ?', t1.token)?.id;
+    await w.post(cookie, 'done', { ticketId: first });
+    expect(buildTicket(w.db, w.clock.t, t1.token)).toMatchObject({ state: 'done', serviceId: w.a.id, takenAt: w.clock.t - 2000 });
+    await w.post(cookie, 'call-next', { expectedCurrentTicketId: null });
+    const second = w.db.get<{ id: number }>("SELECT id FROM tickets WHERE status = 'called'")?.id;
+    await w.post(cookie, 'skip', { ticketId: second });
+    expect(buildTicket(w.db, w.clock.t, t2.token)).toMatchObject({ state: 'skipped', serviceId: w.b.id });
+    w.clock.t += 86_400_000;
+    expect(buildTicket(w.db, w.clock.t, t3.token)).toMatchObject({ state: 'expired', serviceId: w.a.id, takenAt: w.clock.t - 86_400_000 });
+  });
+
+  it('GET /api/services counts waiting tickets per service', async () => {
+    const w = await world();
+    const cookie = await staffAt(w, 'sari', w.loket2.id);
+    const waiting = async () =>
+      ((await (await w.req('/api/services')).json()) as { services: { id: number; waiting: number }[] }).services.map((s) => [s.id, s.waiting]);
+    expect(await waiting()).toEqual([[w.a.id, 0], [w.b.id, 0]]);
+    w.issue(w.a.id);
+    w.issue(w.a.id);
+    w.issue(w.b.id);
+    expect(await waiting()).toEqual([[w.a.id, 2], [w.b.id, 1]]);
+    await w.post(cookie, 'call-next', { expectedCurrentTicketId: null });
+    expect(await waiting()).toEqual([[w.a.id, 1], [w.b.id, 1]]);
+    w.clock.t += 86_400_000;
+    expect(await waiting()).toEqual([[w.a.id, 0], [w.b.id, 0]]);
   });
 });

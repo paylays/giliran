@@ -12,6 +12,8 @@ import { buildWifiPayload } from '../domain/wifi.ts';
 import { listServices } from '../domain/services.ts';
 import { takeTicket } from '../domain/tickets.ts';
 import type { Hub } from '../realtime/hub.ts';
+import { waitingByService } from '../realtime/snapshots.ts';
+import { businessDate } from '../../shared/business-date.ts';
 
 export function publicRoutes(deps: { db: Db; now: () => number; publicUrl: string; hub: Hub }) {
   const { db, now, publicUrl, hub } = deps;
@@ -33,9 +35,18 @@ export function publicRoutes(deps: { db: Db; now: () => number; publicUrl: strin
   });
 
   app.get('/services', (c) => {
+    const settings = getSettings(db);
+    const waiting = new Map(
+      waitingByService(db, businessDate(now(), settings.timezone)).map((w) => [w.serviceId, w.waiting]),
+    );
     const body: PublicServicesResponse = {
-      businessName: getSettings(db).businessName,
-      services: listServices(db, { activeOnly: true }).map((s) => ({ id: s.id, name: s.name, prefix: s.prefix })),
+      businessName: settings.businessName,
+      services: listServices(db, { activeOnly: true }).map((s) => ({
+        id: s.id,
+        name: s.name,
+        prefix: s.prefix,
+        waiting: waiting.get(s.id) ?? 0,
+      })),
     };
     return c.json(body);
   });

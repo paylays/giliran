@@ -135,8 +135,8 @@ describe('public endpoints', () => {
     expect(await res.json()).toEqual({
       businessName: 'Giliran',
       services: [
-        { id: 3, name: 'CS', prefix: 'B' },
-        { id: 1, name: 'Teller', prefix: 'A' },
+        { id: 3, name: 'CS', prefix: 'B', waiting: 0 },
+        { id: 1, name: 'Teller', prefix: 'A', waiting: 0 },
       ],
     });
 

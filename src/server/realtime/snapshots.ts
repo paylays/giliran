@@ -13,7 +13,7 @@ import type {
 
 const RECENT_CALLS = 6;
 
-function waitingByService(db: Db, date: string, onlyCounterId?: number): ServiceWaiting[] {
+export function waitingByService(db: Db, date: string, onlyCounterId?: number): ServiceWaiting[] {
   const filter =
     onlyCounterId === undefined
       ? 's.active = 1'
@@ -74,6 +74,7 @@ export function buildDisplay(db: Db, nowMs: number): DisplaySnapshot {
   return {
     serverTime: nowMs,
     businessName: settings.businessName,
+    timeZone: settings.timezone,
     wifiSsid: settings.wifiSsid,
     wifiQrVersion: settings.wifiSsid ? (settingsVersion?.updated_at ?? 0) : null,
     counters,
@@ -91,6 +92,7 @@ interface TicketRow {
   status: 'waiting' | 'called' | 'done' | 'skipped';
   call_count: number;
   called_at: number | null;
+  created_at: number;
   service_name: string;
   counter_name: string | null;
 }
@@ -101,10 +103,10 @@ export function findTicketServiceId(db: Db, token: string): number | null {
 
 export function buildTicket(db: Db, nowMs: number, token: string): TicketSnapshot {
   const settings = getSettings(db);
-  const base = { serverTime: nowMs, businessName: settings.businessName };
+  const base = { serverTime: nowMs, businessName: settings.businessName, timeZone: settings.timezone };
 
   const t = db.get<TicketRow>(
-    `SELECT t.id, t.service_id, t.service_date, t.seq, t.number, t.status, t.call_count, t.called_at,
+    `SELECT t.id, t.service_id, t.service_date, t.seq, t.number, t.status, t.call_count, t.called_at, t.created_at,
             s.name AS service_name, c.name AS counter_name
        FROM tickets t
        JOIN services s ON s.id = t.service_id
@@ -114,7 +116,13 @@ export function buildTicket(db: Db, nowMs: number, token: string): TicketSnapsho
   );
   if (!t) return { ...base, state: 'not_found' };
 
-  const common = { ...base, number: t.number, serviceName: t.service_name };
+  const common = {
+    ...base,
+    number: t.number,
+    serviceName: t.service_name,
+    serviceId: t.service_id,
+    takenAt: t.created_at,
+  };
   // Any ticket from an earlier business day is dead, whatever its stored status.
   if (t.service_date < businessDate(nowMs, settings.timezone)) return { ...common, state: 'expired' };
 
@@ -148,7 +156,8 @@ export function buildTicket(db: Db, nowMs: number, token: string): TicketSnapsho
 export function buildStaff(db: Db, nowMs: number, tokenHash: string): StaffSnapshot | null {
   const session = peekSession(db, tokenHash, nowMs);
   if (!session) return null;
-  const date = businessDate(nowMs, getSettings(db).timezone);
+  const { timezone } = getSettings(db);
+  const date = businessDate(nowMs, timezone);
 
   const options = db
     .all<{ id: number; name: string }>('SELECT id, name FROM counters WHERE active = 1 ORDER BY sort_order, id')
@@ -167,6 +176,7 @@ export function buildStaff(db: Db, nowMs: number, tokenHash: string): StaffSnaps
   const counter = options.find((o) => o.id === session.counterId) ?? null;
   const snapshot: StaffSnapshot = {
     serverTime: nowMs,
+    timeZone: timezone,
     user: { id: session.user.id, displayName: session.user.displayName, role: session.user.role },
     counter: counter ? { id: counter.id, name: counter.name } : null,
     counterOptions: options,

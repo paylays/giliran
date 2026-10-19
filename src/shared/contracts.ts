@@ -183,7 +183,8 @@ export interface UserDto extends AuthUser {
 
 export interface PublicServicesResponse {
   businessName: string;
-  services: { id: number; name: string; prefix: string }[];
+  // `waiting` counts today's waiting tickets in that service.
+  services: { id: number; name: string; prefix: string; waiting: number }[];
 }
 
 // ---- Snapshots ----
@@ -213,6 +214,8 @@ export interface ServiceWaiting {
 export interface DisplaySnapshot {
   serverTime: number;
   businessName: string;
+  /** IANA timezone of the business; format times with it, not the device zone. */
+  timeZone: string;
   wifiSsid: string | null;
   /** Changes whenever settings are saved; append to the Wi-Fi QR URL so a new password shows at once. */
   wifiQrVersion: number | null;
@@ -224,29 +227,37 @@ export interface DisplaySnapshot {
 interface TicketBase {
   serverTime: number;
   businessName: string;
+  timeZone: string;
+}
+
+// Fields shared by every variant that refers to an existing ticket.
+interface TicketFields {
+  number: string;
+  serviceName: string;
+  serviceId: number;
+  // tickets.created_at, epoch ms.
+  takenAt: number;
 }
 
 export type TicketSnapshot =
   | (TicketBase & { state: 'not_found' })
-  | (TicketBase & { state: 'expired'; number: string; serviceName: string })
-  | (TicketBase & {
-      state: 'waiting';
-      number: string;
-      serviceName: string;
-      // People ahead in the same service today.
-      position: number;
-      near: boolean;
-    })
-  | (TicketBase & {
-      state: 'called';
-      number: string;
-      serviceName: string;
-      callId: string;
-      counterName: string;
-      calledAt: number;
-    })
-  | (TicketBase & { state: 'done'; number: string; serviceName: string })
-  | (TicketBase & { state: 'skipped'; number: string; serviceName: string });
+  | (TicketBase & TicketFields & { state: 'expired' })
+  | (TicketBase &
+      TicketFields & {
+        state: 'waiting';
+        // People ahead in the same service today.
+        position: number;
+        near: boolean;
+      })
+  | (TicketBase &
+      TicketFields & {
+        state: 'called';
+        callId: string;
+        counterName: string;
+        calledAt: number;
+      })
+  | (TicketBase & TicketFields & { state: 'done' })
+  | (TicketBase & TicketFields & { state: 'skipped' });
 
 export interface StaffTicket {
   id: number;
@@ -258,6 +269,7 @@ export interface StaffTicket {
 
 export interface StaffSnapshot {
   serverTime: number;
+  timeZone: string;
   user: { id: number; displayName: string; role: 'admin' | 'staff' };
   // null until the staff member picks a counter.
   counter: { id: number; name: string } | null;
