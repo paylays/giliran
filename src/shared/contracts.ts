@@ -70,7 +70,7 @@ const servicePrefix = z
   .string()
   .trim()
   .transform((v) => v.toUpperCase())
-  .pipe(z.string().regex(/^[A-Z0-9]{1,3}$/, 'Prefix is 1-3 letters or digits'));
+  .pipe(z.string().regex(/^[A-Z]{1,3}$/, 'Prefix is 1-3 letters'));
 
 const numberWidth = z.number().int().min(1).max(6);
 

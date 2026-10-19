@@ -52,27 +52,29 @@ describe('timezone change mid-day', () => {
   const put = (w: Awaited<ReturnType<typeof world>>, timezone: string) =>
     w.adminCall('/api/admin/settings', 'PUT', { businessName: 'Giliran', timezone, nearThreshold: 3 });
 
-  it('uses the new timezone for the next ticket and keeps old tickets untouched', async () => {
+  it('rejects a timezone change while a ticket is waiting and saves nothing', async () => {
     const w = await world();
-    // Test clock: 2023-11-15 05:13 in Jakarta, which is 2023-11-14 21:13 in Los Angeles.
-    expect(w.issue(w.a.id).number).toBe('A001');
-    expect((await put(w, 'America/Los_Angeles')).status).toBe(200);
-    const after = w.issue(w.a.id);
-    const rows = w.db.all<{ service_date: string }>('SELECT service_date FROM tickets ORDER BY id');
-    expect(rows.map((r) => r.service_date)).toEqual(['2023-11-15', '2023-11-14']);
-    // Each (service, date) pair owns its own sequence, so there is no unique-index clash.
-    expect(after.number).toBe('A001');
+    w.issue(w.a.id);
+    const res = await w.adminCall('/api/admin/settings', 'PUT', { businessName: 'Renamed', timezone: 'America/Los_Angeles', nearThreshold: 5 });
+    expect(res.status).toBe(409);
+    expect(await res.json()).toMatchObject({ error: 'queue_active' });
+    const saved = w.db.get<{ business_name: string; timezone: string; near_threshold: number }>(
+      'SELECT business_name, timezone, near_threshold FROM settings WHERE id = 1',
+    );
+    expect(saved).toEqual({ business_name: 'Giliran', timezone: 'Asia/Jakarta', near_threshold: 3 });
   });
 
-  it('keeps issuing without error after the timezone moves back', async () => {
+  it('still saves other settings when the timezone is unchanged during an active queue', async () => {
     const w = await world();
     w.issue(w.a.id);
-    await put(w, 'America/Los_Angeles');
-    w.issue(w.a.id);
-    await put(w, 'Asia/Jakarta');
-    expect(w.issue(w.a.id).number).toBe('A002');
-    const rows = w.db.all<{ service_date: string; seq: number }>('SELECT service_date, seq FROM tickets ORDER BY id');
-    expect(new Set(rows.map((d) => `${d.service_date}/${d.seq}`)).size).toBe(3);
+    const res = await w.adminCall('/api/admin/settings', 'PUT', { businessName: 'Renamed', timezone: 'Asia/Jakarta', nearThreshold: 5 });
+    expect(res.status).toBe(200);
+  });
+
+  it('accepts a timezone change when no ticket is waiting or called', async () => {
+    const w = await world();
+    expect((await put(w, 'America/Los_Angeles')).status).toBe(200);
+    expect(w.db.get<{ timezone: string }>('SELECT timezone FROM settings WHERE id = 1')?.timezone).toBe('America/Los_Angeles');
   });
 });
 

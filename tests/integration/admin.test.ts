@@ -30,6 +30,8 @@ describe('services', () => {
     expect((await call('/api/admin/services', 'POST', { name: 'Other', prefix: 'A' })).status).toBe(409);
     expect((await call('/api/admin/services', 'POST', { name: 'Other', prefix: 'abcd' })).status).toBe(400);
     expect((await call('/api/admin/services', 'POST', { name: 'Other', prefix: 'a-' })).status).toBe(400);
+    expect((await call('/api/admin/services', 'POST', { name: 'Other', prefix: 'A2' })).status).toBe(400);
+    expect((await call('/api/admin/services', 'POST', { name: 'Other', prefix: '7' })).status).toBe(400);
     expect((await call('/api/admin/services', 'POST', { name: '', prefix: 'B' })).status).toBe(400);
   });
 
