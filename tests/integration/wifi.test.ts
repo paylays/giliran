@@ -108,3 +108,21 @@ describe('display snapshot', () => {
     expect(snap).not.toHaveProperty('wifiPassword');
   });
 });
+
+describe('admin settings public addresses', () => {
+  it('returns publicUrl and takeUrl from config on GET and PUT, and ignores them as input', async () => {
+    const ctx = await setup({ publicUrl: 'http://192.168.1.10:3000/' });
+    const cookie = await ctx.loginAs('boss');
+    const expected = { publicUrl: 'http://192.168.1.10:3000', takeUrl: 'http://192.168.1.10:3000/take' };
+    const got = await ctx.req('/api/admin/settings', { cookie });
+    expect(await got.json()).toMatchObject(expected);
+
+    const put = await ctx.req('/api/admin/settings', {
+      method: 'PUT',
+      body: { ...base, publicUrl: 'http://evil.example', takeUrl: 'http://evil.example/take' },
+      cookie,
+    });
+    expect(put.status).toBe(200);
+    expect(await put.json()).toMatchObject(expected);
+  });
+});

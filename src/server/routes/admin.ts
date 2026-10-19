@@ -14,13 +14,16 @@ import {
   updateSettingsBody,
   updateUserBody,
 } from '../../shared/contracts.ts';
+import type { AdminSettingsDto, SettingsDto } from '../../shared/contracts.ts';
 import { getSettings, updateSettings } from '../domain/settings.ts';
 import { createService, listServices, updateService } from '../domain/services.ts';
 import { createCounter, listCounters, updateCounter } from '../domain/counters.ts';
 import { createUser, listUsers, resetPassword, updateUser } from '../domain/users.ts';
 
-export function adminRoutes(deps: { db: Db; now: () => number; hub: Hub }) {
+export function adminRoutes(deps: { db: Db; now: () => number; hub: Hub; publicUrl: string }) {
   const { db, now, hub } = deps;
+  const publicUrl = deps.publicUrl.replace(/\/+$/, '');
+  const withUrls = (settings: SettingsDto): AdminSettingsDto => ({ ...settings, publicUrl, takeUrl: `${publicUrl}/take` });
   const app = new Hono<AppEnv>();
   app.use('*', requireAdmin);
   // Names, assignments, and thresholds feed every view, so any successful admin write refreshes all.
@@ -29,8 +32,8 @@ export function adminRoutes(deps: { db: Db; now: () => number; hub: Hub }) {
     if (c.req.method !== 'GET' && c.res.status < 400) hub.notifyAll();
   });
 
-  app.get('/settings', (c) => c.json(getSettings(db)));
-  app.put('/settings', async (c) => c.json(updateSettings(db, await parseBody(c, updateSettingsBody), now())));
+  app.get('/settings', (c) => c.json(withUrls(getSettings(db))));
+  app.put('/settings', async (c) => c.json(withUrls(updateSettings(db, await parseBody(c, updateSettingsBody), now()))));
 
   app.get('/services', (c) => c.json({ services: listServices(db) }));
   app.post('/services', async (c) =>

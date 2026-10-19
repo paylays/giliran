@@ -159,6 +159,12 @@ export interface SettingsDto {
   wifiSecurity: WifiSecurity;
 }
 
+// Admin settings plus the read-only public addresses derived from PUBLIC_URL.
+export interface AdminSettingsDto extends SettingsDto {
+  publicUrl: string;
+  takeUrl: string;
+}
+
 export interface ServiceDto {
   id: number;
   name: string;

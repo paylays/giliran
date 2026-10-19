@@ -38,7 +38,7 @@ export function createApp(deps: Pick<AppDeps, 'db'> & Partial<AppDeps>) {
 
   app.get('/api/health', (c) => c.json({ ok: true, time: now() }));
   app.route('/api/auth', authRoutes({ db, now, secure }));
-  app.route('/api/admin', adminRoutes({ db, now, hub }));
+  app.route('/api/admin', adminRoutes({ db, now, hub, publicUrl }));
   app.route('/api/staff', staffRoutes({ db, now, hub }));
   app.route('/api/stream', streamRoutes({ db, now, hub }));
   app.route('/api', publicRoutes({ db, now, publicUrl, hub }));
