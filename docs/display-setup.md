@@ -4,7 +4,7 @@ The TV shows the queue and announces each call. This guide covers the device beh
 
 ## What you need
 
-- A device that runs a current **Chrome or Edge**: a mini PC, a laptop, or an Android TV box with Chrome. Connect it to the TV by HDMI or cast target.
+- A device that runs a current **Chrome or Edge**: a mini PC, a laptop, or an Android TV box with Chrome. Connect it to the TV by HDMI.
 - **Smart-TV built-in browsers are not supported.**
 - A network connection that reaches the Giliran server (see [setup-lan.md](setup-lan.md)).
 

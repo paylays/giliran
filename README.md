@@ -44,7 +44,7 @@ npm run dev
 
 Open http://localhost:5173/login, sign in, and open **Pengaturan admin** to add a service and a counter. Then open `/take` to take a number and `/display` for the TV view.
 
-`npm run dev` starts Vite on port 5173 (with `--host`, so other devices on your network can reach it) and the API on port 3000. Vite proxies `/api` to the API.
+`npm run dev` starts Vite on port 5173 (with `--host`, so other devices on your network can reach it) and the API on port 3000. Vite proxies `/api` to the API, so in development every request reaches the API from 127.0.0.1 and all devices share one ticket limit (10 per 10 minutes) and one login limit. To test with several phones, use the build below.
 
 For use on a real network, build and run a single process:
 
