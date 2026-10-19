@@ -52,7 +52,7 @@ export function LoginPage() {
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
   const [failure, setFailure] = useState<Failure | null>(null);
   const [busy, setBusy] = useState(false);
-  const [wait, setWait] = useState({ until: 0, username: '' });
+  const [wait, setWait] = useState({ until: 0, username: '', text: '' });
   const [now, setNow] = useState(() => Date.now());
   const formRef = useRef<HTMLFormElement>(null);
   const [focusTick, setFocusTick] = useState(0);
@@ -117,7 +117,11 @@ export function LoginPage() {
     if (result.failure === 'rate') {
       const current = Date.now();
       setNow(current);
-      setWait({ until: current + result.retryAfterSeconds * 1000, username: username.trim().toLowerCase() });
+      setWait({
+        until: current + result.retryAfterSeconds * 1000,
+        username: username.trim().toLowerCase(),
+        text: t.rateLimitedWait(result.retryAfterSeconds),
+      });
     }
     if (result.failure === 'invalid') setPassword('');
   }
@@ -132,7 +136,7 @@ export function LoginPage() {
 
       <form ref={formRef} className={styles.form} onSubmit={(event) => void submit(event)} noValidate>
         {failure === 'invalid' && <Banner variant="error" title={t.invalid} />}
-        {failure === 'rate' && <Banner variant="error" title={t.rateLimited} />}
+        {waiting && <Banner variant="error" title={wait.text} />}
         {failure === 'network' && <Banner variant="error" title={copy.states.networkError} />}
         {failure === 'server' && <Banner variant="error" title={copy.states.serverError} />}
         {failure === null && expired && <Banner variant="info" title={t.sessionExpired} />}
@@ -154,7 +158,8 @@ export function LoginPage() {
           autoComplete="current-password"
           showText={copy.common.showPassword}
           hideText={copy.common.hidePassword}
-          toggleLabel={copy.common.showPasswordLabel}
+          showLabel={copy.common.showPasswordLabel}
+          hideLabel={copy.common.hidePasswordLabel}
           onChange={(event) => setPassword(event.target.value)}
         />
         <Button type="submit" fullWidth busy={busy} disabled={waiting}>

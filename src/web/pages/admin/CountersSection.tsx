@@ -48,8 +48,9 @@ export function CountersSection() {
       await api.patch(`/api/admin/counters/${counter.id}`, { active });
       counters.refresh();
     } catch (error) {
-      // counter_has_called_ticket has no dedicated text yet, so it shows the general save failure.
-      setActionError(error instanceof ApiError && error.status === 409 ? copy.admin.saveFailed : fail(error));
+      setActionError(
+        error instanceof ApiError && error.code === 'counter_has_called_ticket' ? t.calledTicketConflict : fail(error),
+      );
     } finally {
       setBusyId(null);
       setToDeactivate(null);
@@ -93,7 +94,7 @@ export function CountersSection() {
     <div className={styles.stack}>
       {head}
       {actionError && (
-        <Banner variant="error" title={copy.admin.saveFailed}>
+        <Banner variant="error" title={copy.admin.actionFailedTitle}>
           <p>{actionError}</p>
         </Banner>
       )}
@@ -233,9 +234,10 @@ function CounterForm({ open, counter, services, nextOrder, onClose, onSaved }: F
       if (error instanceof ApiError && error.status === 400 && issuesOf(error).some((i) => i.path === 'name')) {
         const big = issuesOf(error).some((i) => i.path === 'name' && isTooBig(i.message));
         reject(copy.common.fieldErrorsSummary, big ? copy.common.maxLength(80) : copy.common.required(t.name));
-      } else if (error instanceof ApiError && (error.code === 'unknown_service' || error.code === 'counter_has_called_ticket')) {
-        // No dedicated text for these two codes yet; the general save failure is the closest honest message.
-        reject(copy.admin.saveFailed);
+      } else if (error instanceof ApiError && error.code === 'counter_has_called_ticket') {
+        reject(t.calledTicketConflict);
+      } else if (error instanceof ApiError && error.code === 'unknown_service') {
+        reject(t.unknownService);
       } else {
         reject(fail(error));
       }

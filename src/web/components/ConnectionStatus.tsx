@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { copy } from '../content/copy.ts';
 import type { LiveStatus } from '../lib/live.ts';
+import { formatTime } from '../lib/time.ts';
 import styles from './ConnectionStatus.module.css';
 
 const RECOVERED_SHOWN_MS = 3000;
@@ -17,12 +18,6 @@ interface Props {
   wordmark?: ReactNode;
   /** TV only: sound state shown after the connection text while connected. */
   soundText?: string;
-}
-
-function formatTime(epochMs: number, timeZone?: string): string {
-  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
-  if (timeZone) options.timeZone = timeZone;
-  return new Intl.DateTimeFormat('id-ID', options).format(epochMs);
 }
 
 /**

@@ -2,9 +2,10 @@ import { useRef, useState } from 'react';
 import { Link } from 'wouter';
 import { Banner } from '../../components/Banner.tsx';
 import { Button } from '../../components/Button.tsx';
+import { QrImage } from '../../components/QrImage.tsx';
 import { StateView } from '../../components/StateView.tsx';
 import { copy } from '../../content/copy.ts';
-import type { SettingsDto } from '../../../shared/contracts.ts';
+import type { AdminSettingsDto } from '../../../shared/contracts.ts';
 import { SectionHead } from './SectionHead.tsx';
 import { useResource } from './useApi.ts';
 import { useDocTitle } from './useDocTitle.ts';
@@ -16,7 +17,7 @@ const IMAGE_WAIT_MS = 3000;
 
 export function PosterSection() {
   useDocTitle(t.title);
-  const { state, retry } = useResource<SettingsDto>('/api/admin/settings');
+  const { state, retry } = useResource<AdminSettingsDto>('/api/admin/settings');
 
   if (state.status === 'loading') {
     return (
@@ -43,9 +44,9 @@ export function PosterSection() {
   return <PosterView settings={state.data} />;
 }
 
-function PosterView({ settings }: { settings: SettingsDto }) {
+function PosterView({ settings }: { settings: AdminSettingsDto }) {
   const ssid = settings.wifiSsid;
-  const takeUrl = `${window.location.origin}/take`;
+  const { takeUrl } = settings;
   // The Wi-Fi code is requested again with a new stamp before every print, so a password
   // changed a moment ago is never printed from a stale image.
   const [stamp, setStamp] = useState(() => Date.now());
@@ -109,40 +110,33 @@ function PosterView({ settings }: { settings: SettingsDto }) {
 }
 
 interface QrProps {
-  src: string;
+  kind: 'visit' | 'wifi';
+  version?: number;
   alt: string;
   errorText: string;
   size: string;
   onSettled?: () => void;
 }
 
-/** A QR image with an error line when it cannot load. Remounted by `key` when the source changes. */
-function PosterQr({ src, alt, errorText, size, onSettled }: QrProps) {
-  const [failed, setFailed] = useState(false);
+/** A QR image on the poster's framed white field. Remounted by `key` when the stamp changes. */
+function PosterQr({ kind, version, alt, errorText, size, onSettled }: QrProps) {
   return (
     <div className={styles.frame}>
-      {failed ? (
-        <p role="alert" className={styles.qrError} style={{ width: size }}>
-          {errorText}
-        </p>
-      ) : (
-        <img
-          className={styles.qr}
-          src={src}
-          alt={alt}
-          style={{ width: size, height: size }}
-          onLoad={onSettled}
-          onError={() => {
-            setFailed(true);
-            onSettled?.();
-          }}
-        />
-      )}
+      <QrImage
+        kind={kind}
+        version={version}
+        alt={alt}
+        errorText={errorText}
+        size={size}
+        onSettled={onSettled}
+        className={styles.qr}
+        errorClassName={styles.qrError}
+      />
     </div>
   );
 }
 
-function Heading({ settings }: { settings: SettingsDto }) {
+function Heading({ settings }: { settings: AdminSettingsDto }) {
   const name = settings.businessName.trim() || copy.poster.fallbackTitle;
   return (
     <>
@@ -159,7 +153,7 @@ function TwoCodePoster({
   stamp,
   onWifiSettled,
 }: {
-  settings: SettingsDto;
+  settings: AdminSettingsDto;
   ssid: string;
   takeUrl: string;
   stamp: number;
@@ -173,7 +167,8 @@ function TwoCodePoster({
       <section className={styles.step}>
         <PosterQr
           key={stamp}
-          src={`/api/wifi-qr.svg?v=${stamp}`}
+          kind="wifi"
+          version={stamp}
           alt={t.wifiQrAlt(ssid)}
           errorText={t.wifiQrError}
           size="75mm"
@@ -193,7 +188,7 @@ function TwoCodePoster({
       </section>
 
       <section className={styles.step}>
-        <PosterQr src="/api/qr.svg" alt={t.qrAlt} errorText={t.qrError} size="75mm" />
+        <PosterQr kind="visit" alt={t.qrAlt} errorText={t.qrError} size="75mm" />
         <div className={styles.stepText}>
           <p className={styles.numeral} aria-hidden="true">
             2
@@ -210,12 +205,12 @@ function TwoCodePoster({
   );
 }
 
-function OneCodePoster({ settings, takeUrl }: { settings: SettingsDto; takeUrl: string }) {
+function OneCodePoster({ settings, takeUrl }: { settings: AdminSettingsDto; takeUrl: string }) {
   return (
     <div className={styles.sheet}>
       <Heading settings={settings} />
       <div className={styles.single}>
-        <PosterQr src="/api/qr.svg" alt={t.qrAlt} errorText={t.qrError} size="110mm" />
+        <PosterQr kind="visit" alt={t.qrAlt} errorText={t.qrError} size="110mm" />
       </div>
       <ol className={styles.steps}>
         {copy.poster.steps.map((step) => (

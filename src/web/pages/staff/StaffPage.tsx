@@ -27,7 +27,7 @@ export function StaffPage() {
         {panel.loadError ? (
           <StateView
             kind="error"
-            title={copy.staff.title}
+            title={copy.staff.loadError}
             message={panel.loadError === 'network' ? copy.states.networkError : copy.states.serverError}
             retryLabel={copy.common.retry}
             onRetry={() => void panel.refresh()}
@@ -110,6 +110,7 @@ export function StaffPage() {
           status={live.status}
           disconnectedSince={live.disconnectedSince}
           recoveredAt={live.recoveredAt}
+          timeZone={snapshot.timeZone}
         />
         {notice === 'conflict' && (
           <Banner variant="warning" title={copy.staff.conflictTitle}>

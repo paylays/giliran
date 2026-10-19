@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
+import { formatDate, formatTime } from '../../lib/time.ts';
 import styles from './DisplayPage.module.css';
 
-const dateFormat = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-const timeFormat = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' });
-
 /** Date and HH.MM clock on server-corrected time. Updates once a minute, on the minute. */
-export function Clock({ serverOffset }: { serverOffset: number }) {
+export function Clock({ serverOffset, timeZone }: { serverOffset: number; timeZone?: string }) {
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
@@ -22,8 +20,8 @@ export function Clock({ serverOffset }: { serverOffset: number }) {
   if (now === null) return <div className={styles.clockBlock} />;
   return (
     <div className={styles.clockBlock}>
-      <span className={styles.date}>{dateFormat.format(now)}</span>
-      <span className={styles.clock}>{timeFormat.format(now)}</span>
+      <span className={styles.date}>{formatDate(now, timeZone)}</span>
+      <span className={styles.clock}>{formatTime(now, timeZone)}</span>
     </div>
   );
 }

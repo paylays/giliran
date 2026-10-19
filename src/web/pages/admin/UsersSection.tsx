@@ -83,7 +83,7 @@ export function UsersSection() {
       {head}
       {resetDone && <Banner variant="success" title={resetDone} />}
       {actionError && (
-        <Banner variant="error" title={copy.admin.saveFailed}>
+        <Banner variant="error" title={copy.admin.actionFailedTitle}>
           <p>{actionError}</p>
         </Banner>
       )}
@@ -216,7 +216,7 @@ function CreateUserForm({ open, onClose, onSaved }: { open: boolean; onClose: ()
     const login = username.trim().toLowerCase();
     if (name === '') found.displayName = copy.common.required(t.displayName);
     else if (name.length > 80) found.displayName = copy.common.maxLength(80);
-    if (!USERNAME_PATTERN.test(login)) found.username = t.usernameHint;
+    if (!USERNAME_PATTERN.test(login)) found.username = t.usernameInvalid;
     if (password.length < MIN_PASSWORD) found.password = copy.common.minLength(MIN_PASSWORD);
     else if (password.length > 256) found.password = copy.common.maxLength(256);
     if (Object.keys(found).length > 0) {
@@ -234,7 +234,7 @@ function CreateUserForm({ open, onClose, onSaved }: { open: boolean; onClose: ()
       } else if (error instanceof ApiError && error.status === 400) {
         const mapped: CreateErrors = {};
         for (const issue of issuesOf(error)) {
-          if (issue.path === 'username') mapped.username = t.usernameHint;
+          if (issue.path === 'username') mapped.username = t.usernameInvalid;
           if (issue.path === 'displayName') {
             mapped.displayName = isTooBig(issue.message) ? copy.common.maxLength(80) : copy.common.required(t.displayName);
           }
@@ -303,7 +303,8 @@ function CreateUserForm({ open, onClose, onSaved }: { open: boolean; onClose: ()
           autoComplete="new-password"
           showText={copy.common.showPassword}
           hideText={copy.common.hidePassword}
-          toggleLabel={copy.common.showPasswordLabel}
+          showLabel={copy.common.showPasswordLabel}
+          hideLabel={copy.common.hidePasswordLabel}
           onChange={(event) => {
             setPassword(event.target.value);
             setErrors((current) => ({ ...current, password: undefined }));
@@ -392,7 +393,8 @@ function ResetPasswordForm({
           autoComplete="new-password"
           showText={copy.common.showPassword}
           hideText={copy.common.hidePassword}
-          toggleLabel={copy.common.showPasswordLabel}
+          showLabel={copy.common.showPasswordLabel}
+          hideLabel={copy.common.hidePasswordLabel}
           onChange={(event) => {
             setPassword(event.target.value);
             setError(undefined);

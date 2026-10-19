@@ -1,10 +1,11 @@
 import type { TicketSnapshot } from '../../../shared/contracts.ts';
 
-/** A ticket this browser holds. `serviceName` is used to match the ticket to a service row. */
+/** A ticket this browser holds. `serviceId` matches it to a service row; entries saved before it existed lack it until the next check. */
 export interface StoredTicket {
   token: string;
   number: string;
   serviceName: string;
+  serviceId?: number;
 }
 
 const KEY = 'giliran.tickets';
@@ -14,7 +15,12 @@ export const MAX_STORED = 20;
 function isStored(value: unknown): value is StoredTicket {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
-  return typeof v.token === 'string' && typeof v.number === 'string' && typeof v.serviceName === 'string';
+  return (
+    typeof v.token === 'string' &&
+    typeof v.number === 'string' &&
+    typeof v.serviceName === 'string' &&
+    (v.serviceId === undefined || typeof v.serviceId === 'number')
+  );
 }
 
 export function readTickets(): StoredTicket[] {

@@ -55,6 +55,8 @@
 }
 
 .tab {
+  box-sizing: border-box;
+  min-width: 0;
   max-width: 100%;
   padding: var(--tab-pad);
   background: var(--color-teal-900);
@@ -62,7 +64,15 @@
   font-size: var(--tab-font);
   font-weight: var(--tab-weight);
   line-height: var(--leading-xs);
-  overflow-wrap: anywhere;
+}
+
+/* A long name is cut with an ellipsis in every layout; the full text stays in the DOM. */
+.tabText {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .box {
@@ -112,9 +122,7 @@
   flex: none;
   width: calc(288 * var(--tv-px));
   max-width: 40%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  overflow-wrap: normal;
+  min-width: 0;
 }
 
 .side .box {

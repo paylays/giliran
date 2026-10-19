@@ -4,6 +4,7 @@ import { Button } from '../../components/Button.tsx';
 import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { CounterPlate } from '../../components/CounterPlate.tsx';
 import { copy } from '../../content/copy.ts';
+import { formatTime } from '../../lib/time.ts';
 import type { PanelAction } from './useStaffPanel.ts';
 import styles from './StaffPage.module.css';
 
@@ -15,10 +16,6 @@ interface Props {
   onDone: () => void;
   /** Resolves when the skip request has finished, successfully or not. */
   onSkip: (ticketId: number) => Promise<void>;
-}
-
-function formatTime(epochMs: number): string {
-  return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(epochMs);
 }
 
 export function WorkingView({ snapshot, busy, onCallNext, onRecall, onDone, onSkip }: Props) {
@@ -49,7 +46,7 @@ export function WorkingView({ snapshot, busy, onCallNext, onRecall, onDone, onSk
               <>
                 <p>{copy.staff.currentService(current.serviceName)}</p>
                 <p>
-                  {current.calledAt !== null && `${copy.staff.currentCalledAt(formatTime(current.calledAt))} · `}
+                  {current.calledAt !== null && `${copy.staff.currentCalledAt(formatTime(current.calledAt, snapshot.timeZone))} · `}
                   {copy.staff.currentCallCount(current.callCount)}
                 </p>
               </>

@@ -11,6 +11,7 @@ import { StatusBadge, type TicketStatus } from '../../components/StatusBadge.tsx
 import { copy } from '../../content/copy.ts';
 import { canVibrate, enableAlerts } from '../../lib/alerts.ts';
 import { useLiveSnapshot } from '../../lib/live.ts';
+import { formatDate, formatTime } from '../../lib/time.ts';
 import { VisitorFrame } from '../take/VisitorFrame.tsx';
 import { forgetTicket, rememberTicket } from '../take/tickets-store.ts';
 import { CalledOverlay } from './CalledOverlay.tsx';
@@ -18,10 +19,6 @@ import styles from './TicketPage.module.css';
 import { useTicketAlerts } from './useTicketAlerts.ts';
 
 type AlertsState = 'idle' | 'enabling' | 'on' | 'soundOnly' | 'failed';
-
-function formatTime(epochMs: number): string {
-  return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(epochMs);
-}
 
 function callCountOf(callId: string): number {
   const count = Number(callId.split(':')[1]);
@@ -57,13 +54,14 @@ function TicketView({ token }: { token: string }) {
   const state = snapshot?.state;
   const number = snapshot && 'number' in snapshot ? snapshot.number : null;
   const serviceName = snapshot && 'serviceName' in snapshot ? snapshot.serviceName : null;
+  const serviceId = snapshot && 'serviceId' in snapshot ? snapshot.serviceId : null;
   useEffect(() => {
     if (state === 'waiting' || state === 'called') {
-      if (number && serviceName) rememberTicket({ token, number, serviceName });
+      if (number && serviceName) rememberTicket({ token, number, serviceName, serviceId: serviceId ?? undefined });
     } else if (state) {
       forgetTicket(token);
     }
-  }, [state, number, serviceName, token]);
+  }, [state, number, serviceName, serviceId, token]);
 
   const businessName = snapshot?.businessName;
   const title = tabTitle(snapshot);
@@ -109,6 +107,7 @@ function TicketView({ token }: { token: string }) {
             status={live.status}
             disconnectedSince={live.disconnectedSince}
             recoveredAt={live.recoveredAt}
+            timeZone={snapshot?.timeZone}
           />
           {body}
         </VisitorFrame>
@@ -118,7 +117,7 @@ function TicketView({ token }: { token: string }) {
           key={snapshot.callId}
           number={snapshot.number}
           counterName={snapshot.counterName}
-          time={formatTime(snapshot.calledAt)}
+          time={formatTime(snapshot.calledAt, snapshot.timeZone)}
           callCount={callCountOf(snapshot.callId)}
           onClose={closeCalled}
         />
@@ -154,6 +153,14 @@ function TicketBody({ snapshot, alerts, onEnable }: BodyProps) {
       footer={
         <div className={styles.plateInfo}>
           <span>{copy.ticket.service(snapshot.serviceName)}</span>
+          <span>
+            {snapshot.state === 'expired'
+              ? copy.ticket.takenOnDate(
+                  formatDate(snapshot.takenAt, snapshot.timeZone),
+                  formatTime(snapshot.takenAt, snapshot.timeZone),
+                )
+              : copy.ticket.takenAt(formatTime(snapshot.takenAt, snapshot.timeZone))}
+          </span>
           <span>
             <StatusBadge status={status}>{copy.status[status]}</StatusBadge>
           </span>
@@ -221,7 +228,7 @@ function TicketBody({ snapshot, alerts, onEnable }: BodyProps) {
         {plate}
         <section className={`${styles.called} on-teal`} aria-live="polite">
           <h1 className={styles.calledTitle}>{copy.ticket.calledInlineTitle(snapshot.counterName)}</h1>
-          <p>{copy.ticket.calledInlineBody(snapshot.counterName, formatTime(snapshot.calledAt))}</p>
+          <p>{copy.ticket.calledInlineBody(snapshot.counterName, formatTime(snapshot.calledAt, snapshot.timeZone))}</p>
           {count > 1 && <p className={styles.calledCount}>{copy.ticket.callCount(count)}</p>}
         </section>
         {alertsBlock}

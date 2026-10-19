@@ -272,13 +272,6 @@
   min-width: 0;
 }
 
-.qr {
-  display: block;
-  width: calc(168 * var(--u));
-  height: calc(168 * var(--u));
-  background: var(--color-field);
-}
-
 .qrError {
   max-width: none;
   width: 100%;

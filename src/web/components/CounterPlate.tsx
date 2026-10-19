@@ -49,7 +49,9 @@ export function CounterPlate({
         className,
       )}
     >
-      <span className={styles.tab}>{label}</span>
+      <span className={styles.tab}>
+        <span className={styles.tabText}>{label}</span>
+      </span>
       <div className={styles.box}>
         <span className={cx(styles.number, muted && styles.muted)}>{children}</span>
         {footer && <div className={styles.footer}>{footer}</div>}

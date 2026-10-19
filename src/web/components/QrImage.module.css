@@ -1,11 +1,11 @@
-.qr {
+:where(.qr) {
   display: block;
   max-width: 100%;
   height: auto;
   background: var(--color-field);
 }
 
-.error {
+:where(.error) {
   font-size: var(--text-sm);
   color: var(--color-danger-700);
   font-weight: 600;

@@ -68,7 +68,7 @@ export function DisplayPage() {
       <div className={styles.canvas} inert={!started}>
         <header className={styles.header}>
           <p className={businessName ? styles.business : styles.businessWordmark}>{businessName || copy.app.name}</p>
-          <Clock serverOffset={serverOffset} />
+          <Clock serverOffset={serverOffset} timeZone={snapshot?.timeZone} />
         </header>
 
         {snapshot ? (
@@ -97,6 +97,7 @@ export function DisplayPage() {
             status={status}
             disconnectedSince={disconnectedSince}
             recoveredAt={recoveredAt}
+            timeZone={snapshot?.timeZone}
             wordmark={copy.app.name}
             soundText={soundText}
           />

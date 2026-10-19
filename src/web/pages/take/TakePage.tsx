@@ -19,6 +19,7 @@ type TakeError = 'failed' | 'closed' | 'rateLimited';
 
 /** A stored ticket the server confirmed is still waiting or called. */
 interface ActiveTicket extends StoredTicket {
+  serviceId: number;
   status: 'waiting' | 'called';
 }
 
@@ -62,8 +63,19 @@ export function TakePage() {
         if (controller.signal.aborted) return;
         if (snapshot === null) continue;
         if (snapshot.state === 'waiting' || snapshot.state === 'called') {
-          confirmed.push({ ...stored, number: snapshot.number, serviceName: snapshot.serviceName, status: snapshot.state });
-          rememberTicket({ token: stored.token, number: snapshot.number, serviceName: snapshot.serviceName });
+          confirmed.push({
+            ...stored,
+            number: snapshot.number,
+            serviceName: snapshot.serviceName,
+            serviceId: snapshot.serviceId,
+            status: snapshot.state,
+          });
+          rememberTicket({
+            token: stored.token,
+            number: snapshot.number,
+            serviceName: snapshot.serviceName,
+            serviceId: snapshot.serviceId,
+          });
         } else {
           forgetTicket(stored.token);
         }
@@ -93,13 +105,13 @@ export function TakePage() {
     try {
       const knownTokens = readTickets().map((ticket) => ticket.token);
       const issued = await api.post<TakeTicketResponse>('/api/tickets', { serviceId: service.id, knownTokens });
-      openTicket({ token: issued.token, number: issued.number, serviceName: service.name });
+      openTicket({ token: issued.token, number: issued.number, serviceName: service.name, serviceId: service.id });
       return;
     } catch (error) {
       if (error instanceof ApiError) {
         const body = error.body as Partial<AlreadyActiveResponse> | null;
         if (error.status === 409 && error.code === 'already_active' && body?.token && body.number) {
-          openTicket({ token: body.token, number: body.number, serviceName: service.name });
+          openTicket({ token: body.token, number: body.number, serviceName: service.name, serviceId: service.id });
           return;
         }
         if (error.status === 404 || (error.status === 409 && error.code === 'service_inactive')) {
@@ -175,7 +187,7 @@ export function TakePage() {
         {load.kind === 'ready' && load.data.services.length > 0 && (
           <ul className={styles.list}>
             {load.data.services.map((service) => {
-              const held = active.find((ticket) => ticket.serviceName === service.name);
+              const held = active.find((ticket) => ticket.serviceId === service.id);
               return (
                 <li key={service.id}>
                   {held ? (
@@ -200,12 +212,15 @@ export function TakePage() {
                       disabled={taking !== null && taking !== service.id}
                       busy={taking === service.id}
                       aria-label={taking === service.id ? undefined : copy.take.takeLabel(service.name)}
+                      aria-describedby={`waiting-${service.id}`}
                       onClick={() => void take(service)}
                     >
                       <PrefixMark prefix={service.prefix} />
                       <span className={styles.rowText}>
                         <span className={styles.rowName}>{service.name}</span>
-                        {taking === service.id && <span className={styles.rowSub}>{copy.take.taking}</span>}
+                        <span id={`waiting-${service.id}`} className={styles.rowSub}>
+                          {taking === service.id ? copy.take.taking : copy.take.waitingCount(service.waiting)}
+                        </span>
                       </span>
                     </Button>
                   )}

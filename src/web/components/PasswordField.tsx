@@ -9,11 +9,13 @@ interface Props extends Omit<TextFieldProps, 'suffix' | 'type'> {
   showText: string;
   /** Visible toggle text while the password is shown. */
   hideText: string;
-  /** Accessible name of the toggle. It should contain the visible text. */
-  toggleLabel: string;
+  /** Accessible name while the password is hidden. It contains the visible text (WCAG 2.5.3). */
+  showLabel: string;
+  /** Accessible name while the password is shown. */
+  hideLabel: string;
 }
 
-export function PasswordField({ label, hint, error, showText, hideText, toggleLabel, className, ...rest }: Props) {
+export function PasswordField({ label, hint, error, showText, hideText, showLabel, hideLabel, className, ...rest }: Props) {
   const [shown, setShown] = useState(false);
   return (
     <FieldFrame label={label} hint={hint} error={error}>
@@ -33,8 +35,7 @@ export function PasswordField({ label, hint, error, showText, hideText, toggleLa
           <button
             type="button"
             className={styles.toggle}
-            aria-label={toggleLabel}
-            aria-pressed={shown}
+            aria-label={shown ? hideLabel : showLabel}
             onClick={() => setShown((value) => !value)}
           >
             {shown ? hideText : showText}

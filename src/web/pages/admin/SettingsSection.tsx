@@ -9,7 +9,7 @@ import { StateView } from '../../components/StateView.tsx';
 import { TextField } from '../../components/TextField.tsx';
 import { copy } from '../../content/copy.ts';
 import { api, ApiError } from '../../lib/api.ts';
-import type { SettingsDto, UpdateSettingsBody, WifiSecurity } from '../../../shared/contracts.ts';
+import type { AdminSettingsDto, SettingsDto, UpdateSettingsBody, WifiSecurity } from '../../../shared/contracts.ts';
 import { FocusBanner } from './FocusBanner.tsx';
 import { SectionHead } from './SectionHead.tsx';
 import { isTooBig, issuesOf, useFailure, useResource } from './useApi.ts';
@@ -122,7 +122,7 @@ function serverErrors(error: unknown): Errors {
 
 export function SettingsSection() {
   useDocTitle(copy.admin.nav.settings);
-  const { state, retry } = useResource<SettingsDto>('/api/admin/settings');
+  const { state, retry } = useResource<AdminSettingsDto>('/api/admin/settings');
 
   if (state.status === 'loading') {
     return (
@@ -143,7 +143,7 @@ export function SettingsSection() {
   return <SettingsForm settings={state.data} />;
 }
 
-function SettingsForm({ settings }: { settings: SettingsDto }) {
+function SettingsForm({ settings }: { settings: AdminSettingsDto }) {
   const fail = useFailure();
   const [saved, setSaved] = useState(settings);
   const [form, setForm] = useState(() => toForm(settings));
@@ -179,7 +179,7 @@ function SettingsForm({ settings }: { settings: SettingsDto }) {
       body.wifiPassword = form.wifiSecurity === 'nopass' ? null : form.wifiPassword;
     }
     try {
-      const next = await api.put<SettingsDto>('/api/admin/settings', body);
+      const next = await api.put<AdminSettingsDto>('/api/admin/settings', body);
       setSaved(next);
       setForm(toForm(next));
       setErrors({});
@@ -211,7 +211,7 @@ function SettingsForm({ settings }: { settings: SettingsDto }) {
     else void save();
   }
 
-  const origin = window.location.origin;
+  const origin = saved.publicUrl;
 
   return (
     <div className={styles.stack}>
@@ -326,7 +326,8 @@ function SettingsForm({ settings }: { settings: SettingsDto }) {
                   autoComplete="off"
                   showText={copy.common.showPassword}
                   hideText={copy.common.hidePassword}
-                  toggleLabel={copy.common.showPasswordLabel}
+                  showLabel={copy.common.showPasswordLabel}
+                  hideLabel={copy.common.hidePasswordLabel}
                   onChange={(event) => update('wifiPassword', event.target.value)}
                 />
               )}
@@ -348,7 +349,7 @@ function SettingsForm({ settings }: { settings: SettingsDto }) {
           <dl className={styles.addresses}>
             <div>
               <dt>{t.addressTake}</dt>
-              <dd>{`${origin}/take`}</dd>
+              <dd>{saved.takeUrl}</dd>
             </div>
             <div>
               <dt>{t.addressDisplay}</dt>
