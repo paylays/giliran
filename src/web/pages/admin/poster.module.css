@@ -1,0 +1,231 @@
+@page {
+  size: A4 portrait;
+  margin: 15mm;
+}
+
+.target {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.target dt {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.target dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.testNote {
+  color: var(--color-ink-900);
+}
+
+/* The preview shows the real A4 sheet at reduced scale; print puts it back to full size. */
+.preview {
+  zoom: 0.38;
+}
+
+.paper {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 15mm;
+  border: 1px solid var(--color-border-strong);
+  background: #fff;
+  color: var(--color-ink-900);
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet p,
+.sheet h2,
+.sheet h3 {
+  max-width: none;
+}
+
+.business {
+  font-size: 24pt;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.headline {
+  margin-top: 3mm;
+  font-size: 36pt;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.twoLead {
+  margin-top: 4mm;
+  font-size: 16pt;
+  line-height: 1.3;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 85mm 85mm;
+  column-gap: 10mm;
+  align-items: start;
+  margin-top: 8mm;
+  break-inside: avoid;
+}
+
+.step + .step {
+  margin-top: 12mm;
+}
+
+.frame {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: calc(5mm - 2pt);
+  border: 2pt solid var(--color-teal-900);
+  background: #fff;
+}
+
+.qr {
+  display: block;
+  max-width: none;
+}
+
+.qrError {
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--color-danger-700);
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+  min-width: 0;
+}
+
+.numeral {
+  font-size: 48pt;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-teal-900);
+}
+
+.stepTitle {
+  font-size: 22pt;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.stepBody {
+  font-size: 14pt;
+  line-height: 1.35;
+}
+
+.networkLabel {
+  font-size: 14pt;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.networkName {
+  font-size: 16pt;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.small {
+  font-size: 12pt;
+  line-height: 1.35;
+  color: var(--color-ink-600);
+}
+
+.url {
+  font-size: 14pt;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.wordmark {
+  margin-top: 4mm;
+  text-align: right;
+  font-size: 10pt;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.single {
+  display: flex;
+  justify-content: center;
+  margin-top: 4mm;
+}
+
+.steps {
+  margin: 4mm 0 0;
+  padding-left: 1.4em;
+  font-size: 18pt;
+  line-height: 1.3;
+}
+
+.steps li + li {
+  margin-top: 1.5mm;
+}
+
+.writeIn {
+  display: flex;
+  align-items: flex-end;
+  gap: 3mm;
+  margin-top: 5mm;
+  font-size: 18pt;
+  font-weight: 600;
+}
+
+.line {
+  flex: none;
+  width: 100mm;
+  height: 1.2em;
+  border-bottom: 1pt solid var(--color-ink-900);
+}
+
+.gapTop {
+  margin-top: 3mm;
+}
+
+@media (min-width: 600px) {
+  .preview {
+    zoom: 0.5;
+  }
+}
+
+@media (min-width: 1024px) {
+  .preview {
+    zoom: 0.6;
+  }
+}
+
+@media print {
+  :global(body) {
+    background: #fff;
+  }
+
+  .preview {
+    zoom: 1;
+  }
+
+  .paper {
+    width: auto;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+}
