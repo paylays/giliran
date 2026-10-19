@@ -13,12 +13,22 @@ export type LoginBody = z.infer<typeof loginBody>;
 
 // ---- Visitor ----
 
-export const takeTicketBody = z.object({ serviceId: id });
+// knownTokens: every ticket token this browser still stores. The server refuses a new ticket when
+// one of them is an active (waiting or called) ticket of the same service today.
+export const takeTicketBody = z.object({
+  serviceId: id,
+  knownTokens: z.array(z.string().max(64)).max(20).default([]),
+});
 export type TakeTicketBody = z.infer<typeof takeTicketBody>;
 
 export interface TakeTicketResponse {
   token: string;
   number: string;
+}
+
+// 409 body when the browser already holds an active ticket for the service.
+export interface AlreadyActiveResponse extends TakeTicketResponse {
+  error: 'already_active';
 }
 
 // ---- Staff ----

@@ -7,15 +7,20 @@ import { loadSession, originCheck } from './auth/guard.ts';
 import { authRoutes } from './routes/auth.ts';
 import { adminRoutes } from './routes/admin.ts';
 import { publicRoutes } from './routes/public.ts';
+import { staffRoutes } from './routes/staff.ts';
+import { streamRoutes } from './routes/stream.ts';
+import { createHub } from './realtime/hub.ts';
+import type { Hub } from './realtime/hub.ts';
 
 export interface AppDeps {
   db: Db;
   now: () => number;
   publicUrl: string;
+  hub: Hub;
 }
 
 export function createApp(deps: Pick<AppDeps, 'db'> & Partial<AppDeps>) {
-  const { db, now = Date.now, publicUrl = 'http://localhost:3000' } = deps;
+  const { db, now = Date.now, publicUrl = 'http://localhost:3000', hub = createHub() } = deps;
   const secure = publicUrl.startsWith('https://');
   const app = new Hono<AppEnv>();
 
@@ -33,8 +38,10 @@ export function createApp(deps: Pick<AppDeps, 'db'> & Partial<AppDeps>) {
 
   app.get('/api/health', (c) => c.json({ ok: true, time: now() }));
   app.route('/api/auth', authRoutes({ db, now, secure }));
-  app.route('/api/admin', adminRoutes({ db, now }));
-  app.route('/api', publicRoutes({ db, publicUrl }));
+  app.route('/api/admin', adminRoutes({ db, now, hub }));
+  app.route('/api/staff', staffRoutes({ db, now, hub }));
+  app.route('/api/stream', streamRoutes({ db, now, hub }));
+  app.route('/api', publicRoutes({ db, now, publicUrl, hub }));
 
   app.all('/api/*', (c) => c.json({ error: 'not_found' }, 404));
 

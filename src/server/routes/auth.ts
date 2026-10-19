@@ -1,10 +1,8 @@
 import { Hono } from 'hono';
-import { getConnInfo } from '@hono/node-server/conninfo';
 import { deleteCookie, setCookie } from 'hono/cookie';
-import type { Context } from 'hono';
 import type { Db } from '../db/client.ts';
 import { HttpError } from '../errors.ts';
-import { parseBody } from '../http.ts';
+import { clientIp, parseBody } from '../http.ts';
 import type { AppEnv } from '../http.ts';
 import { loginBody } from '../../shared/contracts.ts';
 import { verifyAgainstDecoy, verifyPassword } from '../auth/password.ts';
@@ -12,15 +10,6 @@ import { SESSION_COOKIE, createSession, deleteSession } from '../auth/sessions.t
 import { sessionCookieOptions } from '../auth/cookie.ts';
 import { createFailureLimiter } from '../auth/rate-limit.ts';
 import { findCredentials } from '../domain/users.ts';
-
-function clientIp(c: Context): string {
-  try {
-    return getConnInfo(c).remote.address ?? 'unknown';
-  } catch {
-    // No socket behind the request (in-process calls).
-    return 'unknown';
-  }
-}
 
 export function authRoutes(deps: { db: Db; now: () => number; secure: boolean }) {
   const { db, now, secure } = deps;

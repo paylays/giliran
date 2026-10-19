@@ -1,5 +1,6 @@
 import type { Db } from '../db/client.ts';
 import { HttpError } from '../errors.ts';
+import { closeStaleCalls } from './tickets.ts';
 import type { CounterDto, CreateCounterBody, UpdateCounterBody } from '../../shared/contracts.ts';
 
 interface CounterRow {
@@ -58,9 +59,22 @@ export function createCounter(db: Db, body: CreateCounterBody, now: number): Cou
   });
 }
 
-export function updateCounter(db: Db, id: number, patch: UpdateCounterBody): CounterDto {
+export function updateCounter(db: Db, id: number, patch: UpdateCounterBody, nowMs: number): CounterDto {
   return db.transaction(() => {
     const cur = getCounter(db, id);
+    closeStaleCalls(db, nowMs);
+
+    // A counter holding a called ticket cannot go inactive or drop that ticket's service until it is finished.
+    const held = db.get<{ service_id: number }>(
+      "SELECT service_id FROM tickets WHERE counter_id = ? AND status = 'called'",
+      id,
+    );
+    if (held) {
+      const deactivating = patch.active === false && cur.active;
+      const dropsService = patch.serviceIds !== undefined && !patch.serviceIds.includes(held.service_id);
+      if (deactivating || dropsService) throw new HttpError(409, 'counter_has_called_ticket');
+    }
+
     db.run(
       'UPDATE counters SET name = ?, sort_order = ?, active = ? WHERE id = ?',
       patch.name ?? cur.name,
@@ -69,6 +83,7 @@ export function updateCounter(db: Db, id: number, patch: UpdateCounterBody): Cou
       id,
     );
     if (patch.serviceIds) replaceServices(db, id, patch.serviceIds);
+    if (patch.active === false) db.run('UPDATE sessions SET counter_id = NULL WHERE counter_id = ?', id);
     return getCounter(db, id);
   });
 }

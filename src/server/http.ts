@@ -1,4 +1,5 @@
 import type { Context } from 'hono';
+import { getConnInfo } from '@hono/node-server/conninfo';
 import type { z } from 'zod';
 import { HttpError } from './errors.ts';
 import type { AuthUser } from '../shared/contracts.ts';
@@ -33,4 +34,13 @@ export function parseId(raw: string | undefined): number {
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 1) throw new HttpError(404, 'not_found');
   return n;
+}
+
+export function clientIp(c: Context): string {
+  try {
+    return getConnInfo(c).remote.address ?? 'unknown';
+  } catch {
+    // No socket behind the request (in-process calls).
+    return 'unknown';
+  }
 }

@@ -4,13 +4,17 @@ import { loadConfig } from './config.ts';
 import { openDb } from './db/client.ts';
 import { migrate } from './db/migrate.ts';
 import { serveStatic } from './static.ts';
+import { createHub } from './realtime/hub.ts';
+import { startRollover } from './realtime/rollover.ts';
 
 const config = loadConfig();
 const db = openDb(config.dbPath);
 const applied = migrate(db);
 if (applied.length > 0) console.log(`Applied migrations: ${applied.join(', ')}`);
 
-const app = createApp({ db, now: Date.now, publicUrl: config.publicUrl });
+const hub = createHub();
+const app = createApp({ db, now: Date.now, publicUrl: config.publicUrl, hub });
+const stopRollover = startRollover({ db, now: Date.now, hub });
 app.get('*', serveStatic('dist/web'));
 
 const server = serve({ fetch: app.fetch, hostname: config.host, port: config.port }, (info) => {
@@ -18,6 +22,8 @@ const server = serve({ fetch: app.fetch, hostname: config.host, port: config.por
 });
 
 function shutdown() {
+  stopRollover();
+  hub.close();
   server.close(() => {
     db.close();
     process.exit(0);

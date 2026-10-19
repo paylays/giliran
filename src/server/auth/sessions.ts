@@ -72,3 +72,23 @@ export function deleteSession(db: Db, tokenHash: string): void {
 export function deleteUserSessions(db: Db, userId: number): void {
   db.run('DELETE FROM sessions WHERE user_id = ?', userId);
 }
+
+// Read-only lookup for long-lived streams: unlike findSession it never slides the expiry.
+export function peekSession(
+  db: Db,
+  tokenHash: string,
+  now: number,
+): { user: AuthUser; counterId: number | null } | null {
+  const row = db.get<SessionRow>(
+    `SELECT s.token_hash, s.counter_id, s.expires_at, u.id, u.username, u.display_name, u.role
+       FROM sessions s JOIN users u ON u.id = s.user_id
+      WHERE s.token_hash = ? AND s.expires_at > ? AND u.active = 1`,
+    tokenHash,
+    now,
+  );
+  if (!row) return null;
+  return {
+    user: { id: row.id, username: row.username, displayName: row.display_name, role: row.role },
+    counterId: row.counter_id,
+  };
+}
