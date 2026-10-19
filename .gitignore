@@ -1,0 +1,11 @@
+node_modules/
+dist/
+data/
+.env
+test-results/
+playwright-report/
+CLAUDE.md
+.claude/
+DESIGN.md
+docs/plan.md
+anti-slop/
