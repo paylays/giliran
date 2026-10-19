@@ -1,0 +1,79 @@
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row,
+.ticketRow {
+  justify-content: flex-start;
+  gap: var(--space-4);
+  text-align: left;
+}
+
+.row {
+  min-height: 80px;
+  padding: var(--space-3) var(--space-4);
+}
+
+.ticketRow {
+  min-height: 64px;
+  padding: var(--space-2) var(--space-4);
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.rowName {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: var(--leading-lg);
+  overflow-wrap: anywhere;
+}
+
+.rowSub {
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: var(--leading-sm);
+  color: var(--color-ink-600);
+  overflow-wrap: anywhere;
+}
+
+.rowAction {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-sm);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.ticketNumber {
+  flex: none;
+  font-size: var(--text-xl);
+  font-weight: 800;
+  line-height: var(--leading-xl);
+  color: var(--color-ink-900);
+  font-variant-numeric: tabular-nums;
+}
