@@ -69,10 +69,13 @@ export function buildDisplay(db: Db, nowMs: number): DisplaySnapshot {
       }),
     );
 
+  const settingsVersion = db.get<{ updated_at: number | null }>('SELECT updated_at FROM settings WHERE id = 1');
+
   return {
     serverTime: nowMs,
     businessName: settings.businessName,
     wifiSsid: settings.wifiSsid,
+    wifiQrVersion: settings.wifiSsid ? (settingsVersion?.updated_at ?? 0) : null,
     counters,
     recentCalls,
     services: waitingByService(db, date),

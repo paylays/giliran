@@ -214,6 +214,8 @@ export interface DisplaySnapshot {
   serverTime: number;
   businessName: string;
   wifiSsid: string | null;
+  /** Changes whenever settings are saved; append to the Wi-Fi QR URL so a new password shows at once. */
+  wifiQrVersion: number | null;
   counters: DisplayCounter[];
   recentCalls: CallEntry[];
   services: ServiceWaiting[];

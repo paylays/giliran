@@ -99,9 +99,11 @@ describe('display snapshot', () => {
   it('carries the ssid and never the password', async () => {
     const { put, db, clock } = await admin();
     expect(buildDisplay(db, clock.t).wifiSsid).toBeNull();
+    expect(buildDisplay(db, clock.t).wifiQrVersion).toBeNull();
     await put({ ...base, wifiSsid: 'Cafe', wifiSecurity: 'WPA', wifiPassword: 'secret123' });
     const snap = buildDisplay(db, clock.t);
     expect(snap.wifiSsid).toBe('Cafe');
+    expect(snap.wifiQrVersion).toBe(clock.t);
     expect(JSON.stringify(snap)).not.toContain('secret123');
     expect(snap).not.toHaveProperty('wifiPassword');
   });
