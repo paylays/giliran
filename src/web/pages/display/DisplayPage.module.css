@@ -1,0 +1,590 @@
+/* All sizes are design pixels on a 1920x1080 canvas, scaled by --tv-px. */
+.screen {
+  --u: var(--tv-px);
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--color-cream-50);
+  color: var(--color-ink-900);
+}
+
+.canvas {
+  display: flex;
+  flex-direction: column;
+  width: calc(1920 * var(--u));
+  height: calc(1080 * var(--u));
+  padding: calc(32 * var(--u)) calc(48 * var(--u)) calc(16 * var(--u));
+  overflow: hidden;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Header: business name, date and clock on the signage band */
+.header {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(48 * var(--u));
+  height: calc(96 * var(--u));
+  padding-bottom: calc(8 * var(--u));
+  border-bottom: calc(4 * var(--u)) solid var(--color-teal-900);
+}
+
+.business,
+.businessWordmark {
+  min-width: 0;
+  max-width: none;
+  overflow: hidden;
+  color: var(--color-teal-900);
+  font-size: var(--tv-business);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.businessWordmark {
+  font-weight: 800;
+}
+
+.clockBlock {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: calc(32 * var(--u));
+}
+
+.date {
+  font-size: var(--tv-label);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.clock {
+  min-width: 5ch;
+  font-size: var(--tv-clock);
+  font-weight: 700;
+  line-height: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Main grid */
+.main {
+  display: grid;
+  flex: 1;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: calc(1104 * var(--u)) calc(672 * var(--u));
+  column-gap: calc(48 * var(--u));
+  min-height: 0;
+  margin-top: calc(24 * var(--u));
+}
+
+.left {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) calc(240 * var(--u));
+  row-gap: calc(32 * var(--u));
+  min-height: 0;
+}
+
+.loading {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  font-size: var(--tv-name);
+  color: var(--color-ink-600);
+}
+
+.status {
+  flex: none;
+  margin-top: calc(16 * var(--u));
+}
+
+.heading {
+  margin: 0 0 calc(8 * var(--u));
+  white-space: nowrap;
+  font-size: var(--tv-label);
+  font-weight: 600;
+  line-height: calc(48 * var(--u));
+  letter-spacing: 0;
+  color: var(--color-ink-900);
+}
+
+.quiet {
+  max-width: none;
+  font-size: var(--tv-label);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink-600);
+}
+
+/* Call field */
+.field {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  padding: calc(28 * var(--u)) calc(48 * var(--u));
+  overflow: hidden;
+  border: calc(4 * var(--u)) solid var(--color-teal-900);
+  border-radius: var(--radius-0);
+}
+
+.fieldInverted {
+  background: var(--color-teal-900);
+  color: var(--color-cream-50);
+}
+
+.fieldNormal {
+  background: var(--color-cream-50);
+  color: var(--color-teal-900);
+}
+
+.fieldLabel {
+  max-width: none;
+  font-size: var(--tv-name);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.fieldInverted .fieldLabel {
+  color: var(--color-cream-300);
+}
+
+.fieldNormal .fieldLabel {
+  color: var(--color-ink-600);
+}
+
+.fieldNumber {
+  max-width: none;
+  font-size: var(--tv-call-number);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.fieldGoTo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: calc(24 * var(--u));
+  min-width: 0;
+}
+
+.fieldCounter {
+  min-width: 0;
+  max-width: 100%;
+  font-size: var(--tv-call-counter);
+  font-weight: 800;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.fieldCounter[data-wrap='yes'] {
+  display: -webkit-box;
+  overflow: hidden;
+  line-height: 1;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.fieldNone {
+  max-width: none;
+  margin: auto 0;
+  font-size: var(--tv-name);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Bottom row: recent calls, then the QR area */
+.bottom {
+  display: grid;
+  grid-template-columns: minmax(calc(408 * var(--u)), 1fr) auto;
+  column-gap: calc(48 * var(--u));
+  min-height: 0;
+}
+
+.recent {
+  min-width: 0;
+}
+
+.recentList,
+.plates,
+.waitingList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recentList {
+  display: grid;
+  row-gap: calc(8 * var(--u));
+}
+
+.mini {
+  position: relative;
+}
+
+.mini > div > div {
+  --tab-font: var(--tv-label);
+  --tab-weight: 600;
+  --tab-pad: 0 calc(16 * var(--u));
+  --box-pad: 0 calc(16 * var(--u));
+  --number-size: calc(48 * var(--u));
+}
+
+.mini > div > div > span:first-child {
+  width: auto;
+  min-width: calc(182 * var(--u));
+  max-width: 55%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* QR area */
+.qrArea {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(24 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.qrItem {
+  width: calc(312 * var(--u));
+  min-width: 0;
+}
+
+.qr {
+  display: block;
+  width: calc(168 * var(--u));
+  height: calc(168 * var(--u));
+  background: var(--color-field);
+}
+
+.qrError {
+  max-width: none;
+  width: 100%;
+  height: calc(168 * var(--u));
+  overflow: hidden;
+  font-size: var(--tv-status);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-danger-700);
+}
+
+.qrLine1,
+.qrLine2,
+.qrLine2Ssid {
+  max-width: none;
+  overflow: hidden;
+  font-size: var(--tv-status);
+  line-height: calc(32 * var(--u));
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The step title may run into the 24 px gap between the two items, never past the next item. */
+.qrLine1 {
+  width: calc(336 * var(--u));
+  margin-top: calc(8 * var(--u));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink-900);
+}
+
+.qrLine2 {
+  font-weight: 500;
+  color: var(--color-ink-600);
+}
+
+.qrLine2Ssid {
+  font-weight: 500;
+  color: var(--color-ink-900);
+}
+
+/*
+ * Right column. The page measures overflow and raises data-level (0 to 3) until everything fits:
+ * level 1 steps the numbers down, level 2 tightens gaps and padding, level 3 also hides the
+ * two headings visually (they stay for screen readers). Numbers never go below 64 design px.
+ */
+.right {
+  --gap: calc(16 * var(--u));
+  --row-h: calc(64 * var(--u));
+  --section-gap: calc(24 * var(--u));
+  --tab-pv: 8;
+  --box-pv: 8;
+  --tab-lh: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.right[data-tier='1'] {
+  --cols: 1;
+  --n0: 112;
+  --n1: 96;
+  --n2: 80;
+  --n3: 64;
+}
+
+.right[data-tier='2'] {
+  --cols: 2;
+  --n0: 80;
+  --n1: 72;
+  --n2: 64;
+  --n3: 64;
+}
+
+.right[data-tier='3'] {
+  --cols: 3;
+  --n0: 64;
+  --n1: 64;
+  --n2: 64;
+  --n3: 64;
+}
+
+.right[data-level='0'] {
+  --n: var(--n0);
+}
+
+.right[data-level='1'] {
+  --n: var(--n1);
+  --gap: calc(12 * var(--u));
+  --row-h: calc(60 * var(--u));
+}
+
+.right[data-level='2'] {
+  --n: var(--n2);
+  --gap: calc(8 * var(--u));
+  --row-h: calc(56 * var(--u));
+  --tab-pv: 4;
+  --box-pv: 4;
+  --tab-lh: 1.2;
+}
+
+.right[data-level='3'] {
+  --tab-lh: 1.1;
+  --n: var(--n3);
+  --box-pv: 2;
+  --gap: calc(8 * var(--u));
+  --row-h: calc(56 * var(--u));
+  --section-gap: calc(16 * var(--u));
+  --tab-pv: 4;
+}
+
+.right[data-level='3'] .heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.counters {
+  flex: none;
+}
+
+.plates {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.cell {
+  min-width: 0;
+  --leading-xs: var(--tab-lh);
+}
+
+.cell > div {
+  --number-size: calc(var(--n) * var(--u));
+  --tab-pad: calc(var(--tab-pv) * var(--u)) calc(24 * var(--u));
+  --box-pad: calc(var(--box-pv) * var(--u)) calc(24 * var(--u));
+}
+
+/* Stacked plates name the counter at 40 design px; the narrow three-column cells also trim side padding. */
+.right[data-tier='2'] .cell > div,
+.right[data-tier='3'] .cell > div {
+  --tab-font: var(--tv-label);
+}
+
+.right[data-tier='3'] .cell > div {
+  --tab-pad: calc(var(--tab-pv) * var(--u)) calc(12 * var(--u));
+  --box-pad: calc(var(--box-pv) * var(--u)) calc(12 * var(--u));
+}
+
+.cell > div > span:first-child {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.right[data-level='3'] .cell > div > div > span {
+  line-height: 1;
+}
+
+/* Two columns leave a name only about 230 design px, so the unit is dropped there; the row label still says "orang". */
+.waitingList[data-columns='2'] .serviceUnit {
+  display: none;
+}
+
+.waitingList[data-columns='2'] .serviceCount {
+  min-width: 1.2ch;
+}
+
+/* Waiting counts */
+.waiting {
+  flex: none;
+  margin-top: auto;
+}
+
+.waitingList {
+  display: grid;
+  grid-auto-flow: column;
+  column-gap: calc(16 * var(--u));
+}
+
+.waitingList[data-columns='2'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.waitingRow {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  min-width: 0;
+  border-bottom: 1px solid var(--color-cream-200);
+}
+
+.serviceName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--tv-label);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.serviceCount {
+  flex: none;
+  min-width: 2ch;
+  font-size: var(--tv-count);
+  font-weight: 800;
+  line-height: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.serviceUnit {
+  flex: none;
+  font-size: var(--tv-status);
+  font-weight: 600;
+  color: var(--color-ink-600);
+}
+
+/* Start overlay */
+.overlay {
+  --u: var(--tv-px);
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  background: var(--color-cream-50);
+}
+
+.overlayColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(32 * var(--u));
+  width: calc(1200 * var(--u));
+  max-width: 100%;
+}
+
+.overlayBrand {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  max-width: none;
+  color: var(--color-teal-900);
+}
+
+.wordmark {
+  font-size: var(--tv-name);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.overlayBusiness {
+  font-size: var(--tv-business);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.overlayTitle {
+  max-width: none;
+  font-size: var(--tv-business);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-teal-900);
+}
+
+.overlayBody {
+  max-width: 34em;
+  font-size: var(--tv-label);
+  line-height: 1.35;
+}
+
+.overlayButton {
+  height: calc(120 * var(--u));
+  padding: 0 calc(64 * var(--u));
+  border: 2px solid var(--color-teal-700);
+  border-radius: var(--radius-md);
+  background: var(--color-teal-700);
+  color: var(--color-cream-50);
+  font-size: var(--tv-name);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.overlayButton:active {
+  background: var(--color-teal-900);
+}
+
+@media (hover: hover) {
+  .overlayButton:hover {
+    background: var(--color-teal-800);
+  }
+}
+
+.overlayHint {
+  max-width: 36em;
+  font-size: var(--tv-status);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-ink-600);
+}
