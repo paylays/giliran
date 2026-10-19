@@ -1,0 +1,27 @@
+.region {
+  width: 100%;
+}
+
+.banner {
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-0);
+  background: var(--color-cream-200);
+  color: var(--color-ink-900);
+}
+
+.recovered {
+  border-color: var(--color-teal-700);
+  background: var(--color-teal-100);
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: var(--leading-md);
+}
+
+.body {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
