@@ -85,7 +85,7 @@ Copy `.env.example` to `.env` and edit it. The scripts load `.env` when it exist
 | `npm run typecheck` | `tsc --noEmit`. |
 | `npm run lint` | ESLint. |
 | `npm test` | Vitest: unit and integration tests. |
-| `npm run test:e2e` | Playwright. No browser tests exist in the repo yet. |
+| `npm run test:e2e` | Playwright: builds the app, then runs browser tests against a server on port 3100. |
 
 Pending database migrations are applied automatically when the server or `admin:create` starts.
 
@@ -105,9 +105,12 @@ Pending database migrations are applied automatically when the server or `admin:
 
 ```bash
 npm test
+npm run test:e2e
 ```
 
 Vitest runs `tests/unit` and `tests/integration`. Integration tests exercise the API against an in-memory database.
+
+Playwright runs `tests/e2e` in Chromium. Each test starts a fresh server on port 3100 with its own database (`data/e2e.db`). The tests cover a visitor, a counter and the TV staying in sync, the recall, skip and done flow, recovery after a server restart, and admin setup. If Chromium is missing, run `npx playwright install chromium`.
 
 ## Project structure
 
@@ -118,7 +121,7 @@ src/server/      Hono API, SQLite access, domain logic, SSE hub, daily rollover
 src/shared/      Request schemas and types shared by server and web (contracts.ts)
 src/web/         React app: pages for take, ticket, display, login, staff, admin
 scripts/         create-admin.ts
-tests/           unit and integration tests
+tests/           unit, integration and e2e (Playwright) tests
 docs/            Guides (below)
 ```
 
