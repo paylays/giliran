@@ -7,7 +7,7 @@ import { PASSWORD, setup } from './helpers.ts';
 describe('migrations', () => {
   it('creates every table once and applies nothing the second time', () => {
     const db = openDb(':memory:');
-    expect(migrate(db)).toEqual(['001_init']);
+    expect(migrate(db)).toEqual(['001_init', '002_wifi']);
     expect(migrate(db)).toEqual([]);
     const tables = db
       .all<{ name: string }>("SELECT name FROM sqlite_master WHERE type = 'table'")
@@ -18,7 +18,7 @@ describe('migrations', () => {
     ]) {
       expect(tables).toContain(t);
     }
-    expect(db.get<{ n: number }>('SELECT COUNT(*) AS n FROM schema_migrations')?.n).toBe(1);
+    expect(db.get<{ n: number }>('SELECT COUNT(*) AS n FROM schema_migrations')?.n).toBe(2);
   });
 });
 

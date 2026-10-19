@@ -72,6 +72,7 @@ export function buildDisplay(db: Db, nowMs: number): DisplaySnapshot {
   return {
     serverTime: nowMs,
     businessName: settings.businessName,
+    wifiSsid: settings.wifiSsid,
     counters,
     recentCalls,
     services: waitingByService(db, date),

@@ -8,6 +8,7 @@ import { takeTicketBody } from '../../shared/contracts.ts';
 import type { AlreadyActiveResponse, PublicServicesResponse, TakeTicketResponse } from '../../shared/contracts.ts';
 import { createFailureLimiter } from '../auth/rate-limit.ts';
 import { getSettings } from '../domain/settings.ts';
+import { buildWifiPayload } from '../domain/wifi.ts';
 import { listServices } from '../domain/services.ts';
 import { takeTicket } from '../domain/tickets.ts';
 import type { Hub } from '../realtime/hub.ts';
@@ -20,6 +21,13 @@ export function publicRoutes(deps: { db: Db; now: () => number; publicUrl: strin
 
   app.get('/qr.svg', async (c) => {
     const svg = await QRCode.toString(`${publicUrl}/take`, { type: 'svg', margin: 2 });
+    return c.body(svg, 200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=300' });
+  });
+
+  app.get('/wifi-qr.svg', async (c) => {
+    const { wifiSsid, wifiPassword, wifiSecurity } = getSettings(db);
+    if (!wifiSsid) throw new HttpError(404, 'wifi_not_set');
+    const svg = await QRCode.toString(buildWifiPayload(wifiSsid, wifiPassword, wifiSecurity), { type: 'svg', margin: 2 });
     return c.body(svg, 200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=300' });
   });
 

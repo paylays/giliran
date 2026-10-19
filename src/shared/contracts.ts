@@ -57,10 +57,17 @@ export const timeZoneName = z.string().refine(
   { message: 'Unknown time zone' },
 );
 
+export const wifiSecurities = ['WPA', 'WEP', 'nopass'] as const;
+export type WifiSecurity = (typeof wifiSecurities)[number];
+
 export const updateSettingsBody = z.object({
   businessName: name,
   timezone: timeZoneName,
   nearThreshold: z.number().int().min(1).max(20),
+  // Omitted wifi fields keep their stored value; null clears.
+  wifiSsid: z.string().min(1).max(32).nullable().optional(),
+  wifiPassword: z.string().min(1).max(63).nullable().optional(),
+  wifiSecurity: z.enum(wifiSecurities).optional(),
 });
 export type UpdateSettingsBody = z.infer<typeof updateSettingsBody>;
 
@@ -147,6 +154,9 @@ export interface SettingsDto {
   businessName: string;
   timezone: string;
   nearThreshold: number;
+  wifiSsid: string | null;
+  wifiPassword: string | null;
+  wifiSecurity: WifiSecurity;
 }
 
 export interface ServiceDto {
@@ -203,6 +213,7 @@ export interface ServiceWaiting {
 export interface DisplaySnapshot {
   serverTime: number;
   businessName: string;
+  wifiSsid: string | null;
   counters: DisplayCounter[];
   recentCalls: CallEntry[];
   services: ServiceWaiting[];

@@ -109,9 +109,13 @@ describe('settings', () => {
     const { call } = await admin();
     expect(await (await call('/api/admin/settings')).json()).toEqual({
       businessName: 'Giliran', timezone: 'Asia/Jakarta', nearThreshold: 3,
+      wifiSsid: null, wifiPassword: null, wifiSecurity: 'WPA',
     });
     const ok = await call('/api/admin/settings', 'PUT', { businessName: 'Klinik Sehat', timezone: 'Asia/Makassar', nearThreshold: 5 });
-    expect(await ok.json()).toEqual({ businessName: 'Klinik Sehat', timezone: 'Asia/Makassar', nearThreshold: 5 });
+    expect(await ok.json()).toEqual({
+      businessName: 'Klinik Sehat', timezone: 'Asia/Makassar', nearThreshold: 5,
+      wifiSsid: null, wifiPassword: null, wifiSecurity: 'WPA',
+    });
     const bad = { businessName: 'X', timezone: 'Asia/Jakarta', nearThreshold: 3 };
     expect((await call('/api/admin/settings', 'PUT', { ...bad, timezone: 'Mars/Olympus' })).status).toBe(400);
     expect((await call('/api/admin/settings', 'PUT', { ...bad, nearThreshold: 0 })).status).toBe(400);
