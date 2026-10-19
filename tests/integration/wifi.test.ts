@@ -11,7 +11,7 @@ const migrationsDir = fileURLToPath(new URL('../../src/server/db/migrations', im
 
 async function admin() {
   const ctx = await setup();
-  const cookie = await ctx.loginAs('boss');
+  const cookie = await ctx.loginAs('admin');
   const put = (body: unknown) => ctx.req('/api/admin/settings', { method: 'PUT', body, cookie });
   return { ...ctx, cookie, put };
 }
@@ -112,7 +112,7 @@ describe('display snapshot', () => {
 describe('admin settings public addresses', () => {
   it('returns publicUrl and takeUrl from config on GET and PUT, and ignores them as input', async () => {
     const ctx = await setup({ publicUrl: 'http://192.168.1.10:3000/' });
-    const cookie = await ctx.loginAs('boss');
+    const cookie = await ctx.loginAs('admin');
     const expected = { publicUrl: 'http://192.168.1.10:3000', takeUrl: 'http://192.168.1.10:3000/take' };
     const got = await ctx.req('/api/admin/settings', { cookie });
     expect(await got.json()).toMatchObject(expected);

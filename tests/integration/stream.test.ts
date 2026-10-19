@@ -113,6 +113,31 @@ describe('stream protocol', () => {
     await s.close();
   });
 
+  it('closes a stream whose client never reads and drops its subscription', async () => {
+    const w = await world();
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    const s = await open(w, '/api/stream/display');
+    expect(w.hub.size()).toBe(1);
+    await vi.advanceTimersByTimeAsync(15_000 * 40);
+    expect(w.hub.size()).toBe(0);
+
+    let frames = 0;
+    while (await s.next()) frames++;
+    expect(frames).toBeLessThan(25);
+  });
+
+  it('does not wake streams for a staff snapshot read', async () => {
+    const w = await world();
+    const cookie = await staffAt(w, 'sari', w.loket1.id);
+    await settle();
+    const notify = vi.spyOn(w.hub, 'notify');
+    expect((await w.req('/api/staff/snapshot', { cookie })).status).toBe(200);
+    expect(notify).not.toHaveBeenCalled();
+    w.issue(w.a.id);
+    expect((await w.req('/api/staff/call-next', { method: 'POST', body: { expectedCurrentTicketId: null }, cookie })).status).toBe(200);
+    expect(notify).toHaveBeenCalledTimes(1);
+  });
+
   it('requires a session for the staff stream', async () => {
     const w = await world();
     expect((await w.req('/api/stream/staff')).status).toBe(401);
@@ -261,7 +286,7 @@ describe('ticket stream', () => {
     const w = await world();
     for (let i = 0; i < 3; i++) w.issue(w.a.id);
     const t = w.issue(w.a.id); // position 3
-    const admin = await w.loginAs('boss');
+    const admin = await w.loginAs('admin');
     const s = await open(w, `/api/stream/ticket/${t.token}`);
     await s.next();
     expect(await s.snapshot<TicketSnapshot>()).toMatchObject({ position: 3, near: true });

@@ -31,14 +31,15 @@ export function staffRoutes(deps: { db: Db; now: () => number; hub: Hub }) {
     return row?.counter_id ?? null;
   }
 
-  function respond(c: Context<AppEnv>, result: TransitionResult | null) {
-    hub.notify({ serviceIds: result?.serviceIds ?? [] });
+  // Pass notify: false for reads. A counter pick has no ticket change but still moves the views.
+  function respond(c: Context<AppEnv>, result: TransitionResult | null, notify = true) {
+    if (notify) hub.notify({ serviceIds: result?.serviceIds ?? [] });
     const snapshot = buildStaff(db, now(), auth(c).tokenHash);
     if (!snapshot) throw new HttpError(401, 'unauthenticated');
     return c.json(snapshot);
   }
 
-  app.get('/snapshot', (c) => respond(c, null));
+  app.get('/snapshot', (c) => respond(c, null, false));
 
   app.post('/counter', async (c) => {
     const { counterId } = await parseBody(c, selectCounterBody);

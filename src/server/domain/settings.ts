@@ -43,9 +43,11 @@ export function updateSettings(db: Db, body: UpdateSettingsBody, now: number): S
   const current = getSettings(db);
   if (body.timezone !== current.timezone) {
     // A new timezone can shift the business date and restart numbering, duplicating live ticket numbers.
+    // Both zones count: the new one may still be on a day whose leftover tickets would come back to life.
     const live = db.get<{ n: number }>(
-      "SELECT COUNT(*) AS n FROM tickets WHERE service_date = ? AND status IN ('waiting', 'called')",
+      "SELECT COUNT(*) AS n FROM tickets WHERE service_date IN (?, ?) AND status IN ('waiting', 'called')",
       businessDate(now, current.timezone),
+      businessDate(now, body.timezone),
     );
     if (live && live.n > 0) throw new HttpError(409, 'queue_active');
   }

@@ -3,7 +3,7 @@ import { PASSWORD, setup } from './helpers.ts';
 
 async function admin() {
   const ctx = await setup();
-  const cookie = await ctx.loginAs('boss');
+  const cookie = await ctx.loginAs('admin');
   const call = (path: string, method = 'GET', body?: unknown) => ctx.req(path, { method, body, cookie });
   return { ...ctx, cookie, call };
 }
@@ -99,7 +99,7 @@ describe('staff accounts', () => {
     expect((await login('budi', 'new-password-2')).res.status).toBe(401);
 
     // An admin cannot lock themselves out.
-    const me = (await (await req('/api/auth/me', { cookie: await loginAs('boss') })).json()) as { user: { id: number } };
+    const me = (await (await req('/api/auth/me', { cookie: await loginAs('admin') })).json()) as { user: { id: number } };
     expect((await call(`/api/admin/users/${me.user.id}`, 'PATCH', { active: false })).status).toBe(409);
   });
 });

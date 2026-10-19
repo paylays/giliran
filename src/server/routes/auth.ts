@@ -27,10 +27,11 @@ export function authRoutes(deps: { db: Db; now: () => number; secure: boolean })
       throw new HttpError(429, 'too_many_attempts');
     }
 
+    // Counted before the await so a burst of parallel attempts cannot all pass the check above.
+    limiter.fail(key);
     const found = findCredentials(db, username);
     const ok = found ? await verifyPassword(body.password, found.passwordHash) : await verifyAgainstDecoy(body.password);
     if (!found || !ok) {
-      limiter.fail(key);
       throw new HttpError(401, 'invalid_credentials');
     }
 

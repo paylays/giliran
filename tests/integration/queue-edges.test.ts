@@ -7,7 +7,7 @@ import { seedQueue, setup, staffAt } from './helpers.ts';
 async function world() {
   const ctx = await setup();
   const seed = await seedQueue(ctx);
-  const admin = await ctx.loginAs('boss');
+  const admin = await ctx.loginAs('admin');
   const issue = (serviceId: number) => {
     ctx.clock.t += 1000;
     const r = takeTicket(ctx.db, { serviceId, knownTokens: [] }, ctx.clock.t);
@@ -63,6 +63,19 @@ describe('timezone change mid-day', () => {
       'SELECT business_name, timezone, near_threshold FROM settings WHERE id = 1',
     );
     expect(saved).toEqual({ business_name: 'Giliran', timezone: 'Asia/Jakarta', near_threshold: 3 });
+  });
+
+  it('rejects a switch to a zone that is still on the previous day with waiting tickets', async () => {
+    const w = await world();
+    // A ticket left waiting on Jakarta's Nov 14. At 06:00 WIB on Nov 15 Jakarta has no open tickets,
+    // but Los Angeles is still on Nov 14 and would pick that ticket up again.
+    w.clock.t = Date.UTC(2023, 10, 14, 3, 0, 0);
+    w.issue(w.a.id);
+    w.clock.t = Date.UTC(2023, 10, 14, 23, 0, 0);
+    const res = await put(w, 'America/Los_Angeles');
+    expect(res.status).toBe(409);
+    expect(await res.json()).toMatchObject({ error: 'queue_active' });
+    expect(w.db.get<{ timezone: string }>('SELECT timezone FROM settings WHERE id = 1')?.timezone).toBe('Asia/Jakarta');
   });
 
   it('still saves other settings when the timezone is unchanged during an active queue', async () => {
@@ -267,7 +280,7 @@ describe('role guards and Origin', () => {
   it('lets an admin use the staff panel', async () => {
     const w = await world();
     w.issue(w.a.id);
-    const cookie = await staffAt(w, 'boss', w.loket1.id);
+    const cookie = await staffAt(w, 'admin', w.loket1.id);
     const r = await w.post(cookie, 'call-next', { expectedCurrentTicketId: null });
     expect(r.status).toBe(200);
     expect(r.body.current?.number).toBe('A001');

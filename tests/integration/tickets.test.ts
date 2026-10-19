@@ -231,7 +231,7 @@ describe('counter edits while a ticket is called', () => {
     const w = await world();
     w.issue(w.b.id);
     const staff = await staffAt(w, 'sari', w.loket1.id);
-    const admin = await w.loginAs('boss');
+    const admin = await w.loginAs('admin');
     const patch = (body: unknown) => w.req(`/api/admin/counters/${w.loket1.id}`, { method: 'PATCH', body, cookie: admin });
     const called = await w.post(staff, 'call-next', { expectedCurrentTicketId: null });
 

@@ -25,7 +25,7 @@ describe('migrations', () => {
 describe('auth', () => {
   it('login sets an HttpOnly Lax cookie, /me returns the user, logout clears it', async () => {
     const { req, login, db } = await setup();
-    const { res, cookie } = await login('Boss');
+    const { res, cookie } = await login('Admin');
     expect(res.status).toBe(200);
     const setCookie = res.headers.get('set-cookie') ?? '';
     expect(setCookie).toMatch(/HttpOnly/i);
@@ -40,7 +40,7 @@ describe('auth', () => {
 
     const me = await req('/api/auth/me', { cookie });
     expect(me.status).toBe(200);
-    expect(await me.json()).toMatchObject({ user: { username: 'boss', role: 'admin' } });
+    expect(await me.json()).toMatchObject({ user: { username: 'admin', role: 'admin' } });
 
     const out = await req('/api/auth/logout', { method: 'POST', cookie });
     expect(out.status).toBe(200);
@@ -50,30 +50,41 @@ describe('auth', () => {
 
   it('marks the cookie Secure when PUBLIC_URL is https', async () => {
     const { login } = await setup({ publicUrl: 'https://queue.example.com' });
-    const { res } = await login('boss');
+    const { res } = await login('admin');
     expect(res.headers.get('set-cookie')).toMatch(/Secure/i);
   });
 
   it('rejects a wrong password and an unknown user with 401', async () => {
     const { login } = await setup();
-    expect((await login('boss', 'nope-nope-nope')).res.status).toBe(401);
+    expect((await login('admin', 'nope-nope-nope')).res.status).toBe(401);
     expect((await login('ghost')).res.status).toBe(401);
   });
 
   it('answers 429 on the 6th failure within a minute, and recovers after it', async () => {
     const { login, clock } = await setup();
-    for (let i = 0; i < 5; i++) expect((await login('boss', 'bad-password')).res.status).toBe(401);
-    const blocked = await login('boss', PASSWORD);
+    for (let i = 0; i < 5; i++) expect((await login('admin', 'bad-password')).res.status).toBe(401);
+    const blocked = await login('admin', PASSWORD);
     expect(blocked.res.status).toBe(429);
     expect(blocked.res.headers.get('retry-after')).toBeTruthy();
 
     clock.t += 61_000;
-    expect((await login('boss', PASSWORD)).res.status).toBe(200);
+    expect((await login('admin', PASSWORD)).res.status).toBe(200);
+  });
+
+  it('limits a burst of parallel bad logins for one username and IP', async () => {
+    const { login, clock } = await setup();
+    const results = await Promise.all(Array.from({ length: 20 }, () => login('admin', 'bad-password')));
+    const statuses = results.map((r) => r.res.status);
+    expect(statuses.filter((s) => s === 401).length).toBeLessThanOrEqual(5);
+    expect(statuses.filter((s) => s === 429).length).toBeGreaterThanOrEqual(15);
+
+    clock.t += 61_000;
+    expect((await login('admin', PASSWORD)).res.status).toBe(200);
   });
 
   it('rejects a mutating request with a foreign or missing Origin', async () => {
     const { req } = await setup();
-    const body = { username: 'boss', password: PASSWORD };
+    const body = { username: 'admin', password: PASSWORD };
     const foreign = await req('/api/auth/login', { method: 'POST', body, origin: 'http://evil.example' });
     expect(foreign.status).toBe(403);
     const missing = await req('/api/auth/login', { method: 'POST', body, origin: null });
@@ -82,7 +93,7 @@ describe('auth', () => {
 
   it('expires a session after 12 hours idle and slides expiry while active', async () => {
     const { req, loginAs, clock } = await setup();
-    const cookie = await loginAs('boss');
+    const cookie = await loginAs('admin');
     clock.t += 11 * 3600_000;
     expect((await req('/api/auth/me', { cookie })).status).toBe(200);
     clock.t += 11 * 3600_000;
@@ -95,7 +106,7 @@ describe('auth', () => {
     const { db, clock } = await setup();
     const { createUser } = await import('../../src/server/domain/users.ts');
     await expect(
-      createUser(db, { username: 'boss', displayName: 'Other', password: PASSWORD, role: 'admin' }, clock.t),
+      createUser(db, { username: 'admin', displayName: 'Other', password: PASSWORD, role: 'admin' }, clock.t),
     ).rejects.toMatchObject({ status: 409, code: 'username_taken' });
   });
 });

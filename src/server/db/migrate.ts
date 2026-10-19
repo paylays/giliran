@@ -11,7 +11,6 @@ export function migrate(db: Db, dir: string = defaultDir, now: number = Date.now
   db.exec(
     'CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, applied_at INTEGER NOT NULL)',
   );
-  const done = new Set(db.all<{ version: string }>('SELECT version FROM schema_migrations').map((r) => r.version));
   const files = readdirSync(dir)
     .filter((f) => /^\d+_.+\.sql$/.test(f) && !f.endsWith('.down.sql'))
     .sort();
@@ -19,13 +18,15 @@ export function migrate(db: Db, dir: string = defaultDir, now: number = Date.now
   const applied: string[] = [];
   for (const file of files) {
     const version = file.slice(0, -'.sql'.length);
-    if (done.has(version)) continue;
     const sql = readFileSync(join(dir, file), 'utf8');
-    db.transaction(() => {
+    // The check runs under the write lock, so a second process starting at once sees the first one's result.
+    const ran = db.transaction(() => {
+      if (db.get('SELECT 1 FROM schema_migrations WHERE version = ?', version)) return false;
       db.exec(sql);
       db.run('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)', version, now);
+      return true;
     });
-    applied.push(version);
+    if (ran) applied.push(version);
   }
   return applied;
 }

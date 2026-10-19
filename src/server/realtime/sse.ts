@@ -2,6 +2,8 @@ import type { Hub, Topic } from './hub.ts';
 
 export const PING_INTERVAL_MS = 15_000;
 export const RETRY_MS = 3000;
+// Chunks queued beyond this mean the client is not reading; the stream ends and the client reconnects.
+export const MAX_BACKLOG = 16;
 
 export interface StreamSource {
   topic: Topic;
@@ -37,6 +39,10 @@ export function sseResponse(req: Request, hub: Hub, now: () => number, source: S
 
       const write = (text: string) => {
         if (closed) return;
+        if ((controller.desiredSize ?? 0) < -MAX_BACKLOG) {
+          close();
+          return;
+        }
         try {
           controller.enqueue(encoder.encode(text));
         } catch {

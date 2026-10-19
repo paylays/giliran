@@ -1,3 +1,4 @@
+import type { Server } from 'node:http';
 import { serve } from '@hono/node-server';
 import { createApp } from './app.ts';
 import { loadConfig } from './config.ts';
@@ -24,6 +25,8 @@ const server = serve({ fetch: app.fetch, hostname: config.host, port: config.por
 function shutdown() {
   stopRollover();
   hub.close();
+  // Open SSE streams would otherwise keep close() from finishing before the fallback exit.
+  (server as Server).closeAllConnections();
   server.close(() => {
     db.close();
     process.exit(0);

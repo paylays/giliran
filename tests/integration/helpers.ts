@@ -16,7 +16,7 @@ export async function setup(opts: { publicUrl?: string } = {}) {
   const hub = createHub();
   const app = createApp({ db, now: () => clock.t, hub, ...opts });
 
-  await createUser(db, { username: 'boss', displayName: 'Boss', password: PASSWORD, role: 'admin' }, clock.t);
+  await createUser(db, { username: 'admin', displayName: 'Admin', password: PASSWORD, role: 'admin' }, clock.t);
   await createUser(db, { username: 'sari', displayName: 'Sari', password: PASSWORD, role: 'staff' }, clock.t);
 
   function req(path: string, init: { method?: string; body?: unknown; cookie?: string; origin?: string | null } = {}) {
