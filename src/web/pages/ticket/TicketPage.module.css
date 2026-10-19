@@ -1,0 +1,88 @@
+.plateInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.state,
+.alerts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.position {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.count {
+  min-width: 2ch;
+  font-size: var(--num-md);
+  font-weight: 800;
+  line-height: var(--leading-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.ahead {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: var(--leading-lg);
+  letter-spacing: 0;
+}
+
+.front,
+.final {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.frontTitle {
+  font-size: var(--text-lg);
+}
+
+.hint {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-ink-600);
+}
+
+.called {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  background: var(--color-teal-900);
+  color: var(--color-cream-50);
+}
+
+.calledTitle {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.calledCount {
+  font-size: var(--text-sm);
+  color: var(--color-cream-300);
+}
+
+.keepOpen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-cream-100);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.keepOpenTitle {
+  font-size: var(--text-md);
+  font-weight: 700;
+}

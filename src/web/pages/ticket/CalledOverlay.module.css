@@ -1,0 +1,98 @@
+/* Hard cut between normal and inverted every 500 ms, three cycles, ending inverted. */
+@keyframes flash {
+  0% {
+    --ov-bg: var(--color-cream-50);
+    --ov-fg: var(--color-teal-900);
+    --ov-fg2: var(--color-ink-600);
+  }
+  16.666% {
+    --ov-bg: var(--color-teal-900);
+    --ov-fg: var(--color-cream-50);
+    --ov-fg2: var(--color-cream-300);
+  }
+  33.333% {
+    --ov-bg: var(--color-cream-50);
+    --ov-fg: var(--color-teal-900);
+    --ov-fg2: var(--color-ink-600);
+  }
+  50% {
+    --ov-bg: var(--color-teal-900);
+    --ov-fg: var(--color-cream-50);
+    --ov-fg2: var(--color-cream-300);
+  }
+  66.666% {
+    --ov-bg: var(--color-cream-50);
+    --ov-fg: var(--color-teal-900);
+    --ov-fg2: var(--color-ink-600);
+  }
+  83.333%,
+  100% {
+    --ov-bg: var(--color-teal-900);
+    --ov-fg: var(--color-cream-50);
+    --ov-fg2: var(--color-cream-300);
+  }
+}
+
+.overlay {
+  --ov-bg: var(--color-teal-900);
+  --ov-fg: var(--color-cream-50);
+  --ov-fg2: var(--color-cream-300);
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-4) 0;
+  background: var(--ov-bg);
+  color: var(--ov-fg);
+  animation: flash 3s step-end 1 both;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: var(--leading-lg);
+}
+
+.number {
+  font-size: var(--num-lg);
+  font-weight: 800;
+  line-height: var(--leading-num);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.goTo {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: var(--leading-lg);
+  color: var(--ov-fg2);
+}
+
+.counter {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  line-height: var(--leading-2xl);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--ov-fg2);
+}
+
+.action {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: var(--space-4) 0 max(var(--space-5), env(safe-area-inset-bottom));
+}
+
+@media (min-width: 600px) {
+  .overlay {
+    padding-inline: max(var(--space-5), calc((100vw - var(--column-visitor)) / 2));
+  }
+}

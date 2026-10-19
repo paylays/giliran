@@ -1,0 +1,59 @@
+.region {
+  width: 100%;
+}
+
+.banner {
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-0);
+  background: var(--color-cream-200);
+  color: var(--color-ink-900);
+}
+
+.recovered {
+  border-color: var(--color-teal-700);
+  background: var(--color-teal-100);
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: var(--leading-md);
+}
+
+.body {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+/* TV status line: the whole strip turns into a danger strip while the stream is down. */
+.strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tv-space-3);
+  min-height: calc(48 * var(--tv-px));
+  padding: 0 var(--tv-space-2);
+  background: transparent;
+  color: var(--color-ink-900);
+  font-size: var(--tv-status);
+  font-weight: 500;
+  line-height: var(--leading-xs);
+}
+
+.stripDown {
+  background: var(--color-danger-100);
+  color: var(--color-danger-700);
+  font-weight: 600;
+}
+
+.stripMark {
+  flex: none;
+  font-size: var(--tv-status);
+  font-weight: 800;
+}
+
+.stripText {
+  min-width: 0;
+  text-align: right;
+}

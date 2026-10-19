@@ -1,0 +1,157 @@
+.plate {
+  --plate-border: var(--border-plate);
+  --plate-radius: var(--radius-sm);
+  --tab-font: var(--text-xs);
+  --tab-weight: 600;
+  --tab-pad: 4px 8px;
+  --box-pad: var(--space-3) var(--space-4);
+  --number-size: var(--num-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.block {
+  width: 100%;
+}
+
+/* Phone and staff sizes */
+.ticket {
+  --number-size: var(--num-lg);
+}
+
+.staffCurrent {
+  --number-size: var(--num-xl);
+}
+
+.staffNext {
+  --number-size: var(--num-md);
+}
+
+/* TV sizes: square corners, 4px border, scaled with the design-pixel unit */
+.tvLg,
+.tvMd,
+.tvSm {
+  --plate-border: var(--border-plate-tv);
+  --plate-radius: var(--radius-0);
+  --tab-font: var(--tv-name);
+  --tab-weight: 700;
+  --tab-pad: var(--tv-space-1) var(--tv-space-3);
+  --box-pad: var(--tv-space-1) var(--tv-space-3);
+}
+
+.tvLg {
+  --number-size: var(--tv-number-md);
+}
+
+.tvMd {
+  --number-size: var(--tv-number-sm);
+}
+
+.tvSm {
+  --number-size: calc(64 * var(--tv-px));
+}
+
+.tab {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  padding: var(--tab-pad);
+  background: var(--color-teal-900);
+  color: var(--color-cream-50);
+  font-size: var(--tab-font);
+  font-weight: var(--tab-weight);
+  line-height: var(--leading-xs);
+}
+
+/* A long name is cut with an ellipsis in every layout; the full text stays in the DOM. */
+.tabText {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.box {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--box-pad);
+  border: var(--plate-border) solid var(--color-teal-900);
+  border-radius: var(--plate-radius);
+  background: var(--color-cream-50);
+  color: var(--color-ink-900);
+  min-width: 0;
+}
+
+.number {
+  display: block;
+  font-size: var(--number-size);
+  font-weight: 800;
+  line-height: var(--leading-num);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.muted {
+  font-size: var(--tv-label);
+  font-weight: 600;
+  line-height: var(--leading-lg);
+  color: var(--color-ink-600);
+}
+
+.footer {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-ink-600);
+}
+
+/* Horizontal TV plate: the tab is a full-height cell on the left */
+.side {
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+}
+
+.side .tab {
+  display: flex;
+  align-items: center;
+  flex: none;
+  width: calc(288 * var(--tv-px));
+  max-width: 40%;
+  min-width: 0;
+}
+
+.side .box {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  border-left: 0;
+}
+
+.inverted .box {
+  background: var(--color-teal-900);
+  color: var(--color-cream-50);
+}
+
+.inverted .footer {
+  color: var(--color-cream-300);
+}
+
+.mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border: var(--border-plate) solid var(--color-teal-900);
+  border-radius: var(--radius-sm);
+  background: var(--color-cream-50);
+  color: var(--color-teal-900);
+  font-size: var(--text-lg);
+  font-weight: 800;
+}

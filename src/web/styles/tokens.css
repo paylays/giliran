@@ -1,0 +1,90 @@
+:root {
+  /* Color */
+  --color-cream-50: #faf6ec;
+  --color-cream-100: #f1eada;
+  --color-cream-200: #e4dac3;
+  --color-cream-300: #d9cfb6;
+  --color-teal-100: #dcebe5;
+  --color-teal-700: #0e5e59;
+  --color-teal-800: #0b4844;
+  --color-teal-900: #0a3432;
+  --color-ink-900: #1b2524;
+  --color-ink-600: #4b5755;
+  --color-field: #ffffff;
+  --color-border-strong: #7a7262;
+  --color-danger-700: #9e2f1d;
+  --color-danger-100: #f7e3dc;
+  --color-focus: #0a3432;
+  --color-focus-inverse: #faf6ec;
+  --color-scrim: rgba(10, 52, 50, 0.64);
+
+  /* Type */
+  --font-sans: 'Plus Jakarta Sans Variable', 'Segoe UI', Roboto, 'Noto Sans', Arial, sans-serif;
+  --text-xs: 0.875rem;
+  --text-sm: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.5rem;
+  --num-md: 3.5rem;
+  --num-lg: clamp(4rem, 22vw, 5.5rem);
+  --num-xl: clamp(5rem, 9vw, 8rem);
+  --leading-xs: 1.4;
+  --leading-sm: 1.45;
+  --leading-md: 1.5;
+  --leading-lg: 1.35;
+  --leading-xl: 1.2;
+  --leading-2xl: 1.1;
+  --leading-num: 1;
+
+  /* Spacing, 4px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Shape */
+  --radius-0: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --border-input: 2px;
+  --border-plate: 2px;
+  --border-plate-tv: 4px;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --ease: ease-out;
+
+  /* Sizing */
+  --tap-min: 48px;
+  --measure: 36em;
+  --column-visitor: 480px;
+
+  /* TV: design pixels on a 1920x1080 canvas, scaled by one unit */
+  --tv-px: min(calc(100vw / 1920), calc(100vh / 1080));
+  --tv-status: calc(28 * var(--tv-px));
+  --tv-label: calc(40 * var(--tv-px));
+  --tv-name: calc(48 * var(--tv-px));
+  --tv-business: calc(56 * var(--tv-px));
+  --tv-count: calc(56 * var(--tv-px));
+  --tv-number-sm: calc(80 * var(--tv-px));
+  --tv-clock: calc(88 * var(--tv-px));
+  --tv-number-md: calc(112 * var(--tv-px));
+  --tv-call-counter: calc(128 * var(--tv-px));
+  --tv-call-number: calc(264 * var(--tv-px));
+  --tv-space-1: calc(8 * var(--tv-px));
+  --tv-space-2: calc(16 * var(--tv-px));
+  --tv-space-3: calc(24 * var(--tv-px));
+  --tv-space-4: calc(32 * var(--tv-px));
+  --tv-space-5: calc(48 * var(--tv-px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+  }
+}

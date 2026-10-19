@@ -1,0 +1,49 @@
+.banner {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-teal-900);
+  border-radius: var(--radius-0);
+  background: var(--color-teal-100);
+  color: var(--color-ink-900);
+}
+
+.info .title {
+  color: var(--color-teal-900);
+}
+
+.success {
+  border-color: var(--color-teal-700);
+}
+
+.success .title {
+  color: var(--color-teal-900);
+}
+
+.warning {
+  border-color: var(--color-ink-900);
+  background: var(--color-cream-100);
+}
+
+.error {
+  border-color: var(--color-danger-700);
+  background: var(--color-danger-100);
+}
+
+.error .title {
+  color: var(--color-danger-700);
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: var(--leading-md);
+}
+
+.body {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.body > * + * {
+  margin-top: var(--space-1);
+}
