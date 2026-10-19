@@ -28,7 +28,8 @@ export function publicRoutes(deps: { db: Db; now: () => number; publicUrl: strin
     const { wifiSsid, wifiPassword, wifiSecurity } = getSettings(db);
     if (!wifiSsid) throw new HttpError(404, 'wifi_not_set');
     const svg = await QRCode.toString(buildWifiPayload(wifiSsid, wifiPassword, wifiSecurity), { type: 'svg', margin: 2 });
-    return c.body(svg, 200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=300' });
+    // Carries the Wi-Fi password and must reflect a password change immediately.
+    return c.body(svg, 200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-store' });
   });
 
   app.get('/services', (c) => {

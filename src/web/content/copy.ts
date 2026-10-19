@@ -284,6 +284,17 @@ export const copy = {
     qrCaption: 'Pindai untuk ambil nomor',
     qrAlt: 'Kode QR menuju halaman ambil nomor',
     qrError: 'Kode QR gagal dimuat. Muat ulang layar ini.',
+    // Second caption line under the single take-a-number QR, shown when no Wi-Fi is set.
+    qrNeedsWifi: 'Pakai Wi-Fi tempat ini',
+
+    // QR pair, shown when a Wi-Fi name is set. Wi-Fi comes first: the take page only loads on the venue network.
+    // Caption line 1 is the step title; line 2 is the network name (wifiSsid as stored) or takeStepNote.
+    wifiStepTitle: '1. Sambungkan ke Wi-Fi',
+    wifiQrAlt: (ssid: string): string => `Kode QR untuk tersambung ke Wi-Fi ${ssid}`,
+    wifiQrError: 'Kode QR Wi-Fi gagal dimuat. Muat ulang layar ini.',
+    takeStepTitle: '2. Ambil nomor',
+    takeStepNote: 'setelah tersambung',
+    qrStepsLabel: 'Cara mengambil nomor dari ponsel',
 
     // Screen-reader and caption text for a call (the spoken version lives in announceCall)
     callLine: (ticketNumber: string, counterName: string): string =>
@@ -412,14 +423,53 @@ export const copy = {
       timezoneInvalid: 'Zona waktu tidak dikenal. Contoh penulisan yang benar: Asia/Jakarta.',
       timezoneWarningTitle: 'Perhatian sebelum mengubah zona waktu',
       timezoneWarningBody:
-        'Jika zona waktu diubah saat layanan berjalan, tanggal layanan bisa bergeser. Nomor bisa mulai lagi dari awal, dan nomor yang sedang menunggu bisa dianggap kedaluwarsa. Ubah zona waktu di luar jam layanan.',
+        'Zona waktu hanya bisa diubah saat tidak ada nomor yang menunggu atau sedang dipanggil hari ini. Setelah diubah, tanggal layanan bisa bergeser dan nomor bisa mulai lagi dari awal. Ubah zona waktu di luar jam layanan.',
       timezoneConfirmTitle: (timezone: string): string => `Ubah zona waktu ke ${timezone}?`,
       timezoneConfirmButton: 'Ya, ubah zona waktu',
+      // Server refused a timezone change (409 queue_active). The whole form was rejected, so nothing was saved.
+      timezoneQueueActiveTitle: 'Zona waktu belum bisa diubah',
+      timezoneQueueActiveBody:
+        'Hari ini masih ada nomor yang menunggu atau sedang dipanggil, jadi tidak ada perubahan yang disimpan. Selesaikan atau lewati dulu nomor-nomor itu di panel loket, atau ubah zona waktu besok sebelum layanan dibuka. Untuk menyimpan perubahan lain sekarang, kembalikan zona waktu ke pilihan semula.',
       nearThreshold: 'Pemberitahuan giliran dekat',
       nearThresholdSuffix: 'orang',
       nearThresholdHint:
         'Pengunjung mendapat tanda saat jumlah orang di depannya sama dengan atau kurang dari angka ini. Isi 1 sampai 20.',
       nearThresholdInvalid: 'Isi angka bulat dari 1 sampai 20.',
+
+      // Visitor Wi-Fi: printed and shown as a join QR. Turning it off saves wifiSsid null, which also clears the password.
+      wifiHeading: 'Wi-Fi untuk pengunjung',
+      wifiLead:
+        'Isi Wi-Fi tamu tempat ini. Poster dan layar TV lalu memuat kode QR yang menyambungkan ponsel pengunjung ke Wi-Fi tanpa mengetik kata sandi.',
+      wifiRiskTitle: 'Pakai Wi-Fi tamu, bukan Wi-Fi kantor atau kasir',
+      wifiRiskBody:
+        'Siapa pun yang memindai kode QR Wi-Fi bisa membaca kata sandinya, dan kode ini tertempel di poster serta tampil di layar TV. Pakai jaringan tamu yang terpisah dari komputer kantor dan mesin kasir.',
+      wifiEnabled: 'Tampilkan kode QR Wi-Fi di poster dan layar TV',
+      wifiEnabledHint: 'Jika dimatikan lalu disimpan, nama dan kata sandi Wi-Fi yang tersimpan ikut dihapus.',
+      wifiOff:
+        'Kode QR Wi-Fi tidak ditampilkan. Poster dan layar TV hanya memuat kode QR ambil nomor, jadi pengunjung harus menyambungkan ponsel ke Wi-Fi sendiri.',
+      wifiSsid: 'Nama Wi-Fi',
+      wifiSsidHint:
+        'Tulis persis seperti yang muncul di daftar Wi-Fi ponsel, termasuk huruf besar dan kecil. Paling banyak 32 karakter.',
+      wifiSsidRequired: 'Isi nama Wi-Fi, atau matikan kode QR Wi-Fi.',
+      wifiSsidTooLong: 'Nama Wi-Fi paling banyak 32 karakter.',
+      wifiSecurity: 'Jenis keamanan',
+      wifiSecurityHint: 'Lihat di pengaturan router. Jika ragu, pilih WPA/WPA2.',
+      // Option labels for wifiSecurity 'WPA' | 'WEP' | 'nopass'.
+      wifiSecurityWpa: 'WPA/WPA2',
+      wifiSecurityWep: 'WEP (jenis lama)',
+      wifiSecurityNone: 'Tanpa kata sandi',
+      wifiPassword: 'Kata sandi Wi-Fi',
+      wifiPasswordHint: 'Huruf besar dan kecil dibedakan. Untuk WPA/WPA2: 8 sampai 63 karakter.',
+      wifiPasswordRequired: 'Isi kata sandi Wi-Fi, atau pilih Tanpa kata sandi jika Wi-Fi ini terbuka.',
+      wifiPasswordWpaLength: 'Kata sandi WPA/WPA2 harus 8 sampai 63 karakter.',
+      wifiPasswordTooLong: 'Kata sandi paling banyak 63 karakter.',
+      wifiNetworkTitle: 'Syarat jaringan',
+      wifiNetworkItems: [
+        'Komputer server tersambung ke Wi-Fi tamu ini. Jika tidak, ponsel pengunjung tersambung ke Wi-Fi tetapi halaman ambil nomor tidak terbuka.',
+        'Fitur isolasi klien di Wi-Fi tamu dimatikan. Di router, fitur ini sering bernama AP Isolation atau Client Isolation. Jika masih menyala, halaman ambil nomor juga tidak terbuka.',
+        'Layar TV dan perangkat petugas tersambung ke Wi-Fi tamu ini, atau ke jaringan lain yang bisa menjangkau komputer server.',
+      ],
+
       addressesHeading: 'Alamat untuk perangkat',
       addressTake: 'Halaman ambil nomor',
       addressDisplay: 'Layar TV',
@@ -445,8 +495,8 @@ export const copy = {
       name: 'Nama layanan',
       nameHint: 'Tampil di halaman ambil nomor dan layar TV, misalnya Pendaftaran atau Kasir.',
       prefix: 'Awalan nomor',
-      prefixHint: '1 sampai 3 karakter, huruf A-Z atau angka 0-9. Pakai huruf agar nomor mudah dibaca, misalnya A untuk A001.',
-      prefixInvalid: 'Awalan harus 1 sampai 3 karakter berupa huruf A-Z atau angka 0-9.',
+      prefixHint: '1 sampai 3 huruf A-Z, misalnya A untuk nomor A001.',
+      prefixInvalid: 'Awalan harus 1 sampai 3 huruf A-Z, tanpa angka atau spasi.',
       prefixTaken: (prefix: string): string => `Awalan ${prefix} sudah dipakai layanan lain.`,
       prefixChangeNote: 'Awalan baru berlaku untuk nomor berikutnya. Nomor yang sudah diambil tetap memakai awalan lama.',
       firstNumberPreview: (example: string): string => `Nomor pertama setiap hari: ${example}`,
@@ -522,14 +572,25 @@ export const copy = {
 
     poster: {
       title: 'Poster kode QR',
-      lead: 'Cetak poster ini dan tempel di pintu masuk atau ruang tunggu. Kode QR membuka halaman ambil nomor.',
-      targetLabel: 'Alamat di dalam kode QR',
+      lead: 'Cetak poster ini dan tempel di pintu masuk atau ruang tunggu, di tempat yang mudah dijangkau kamera ponsel.',
+      targetLabel: 'Alamat di dalam kode QR ambil nomor',
       ipWarning:
         'Alamat ini memakai alamat IP komputer server. Jika alamat IP berubah, poster lama tidak bisa dipakai. Minta pengelola jaringan memberi alamat IP tetap (reservasi DHCP) untuk komputer server.',
-      wifiNote: 'Setelah dicetak, tulis nama Wi-Fi tempat ini di kolom yang tersedia. Ponsel pengunjung harus tersambung ke Wi-Fi itu.',
+      // Shown when no Wi-Fi is set: the poster prints one QR and a blank line for the Wi-Fi name.
+      wifiNote:
+        'Wi-Fi belum diisi, jadi poster hanya memuat kode QR ambil nomor dan kolom kosong untuk nama Wi-Fi. Setelah dicetak, tulis nama Wi-Fi tempat ini di kolom itu. Agar pengunjung cukup memindai kode QR untuk tersambung, isi Wi-Fi di bagian Umum.',
+      wifiOnNote: (ssid: string): string =>
+        `Poster memuat dua kode QR: kode 1 menyambungkan ponsel ke Wi-Fi ${ssid}, kode 2 membuka halaman ambil nomor.`,
+      wifiSettingsLink: 'Atur Wi-Fi di bagian Umum',
+      testNote:
+        'Sebelum mencetak, uji dengan ponsel yang belum pernah memakai Wi-Fi ini: pindai kode 1, lalu kode 2. Jika halaman ambil nomor tidak terbuka, periksa syarat jaringan di bagian Umum.',
+      testNoteSingle:
+        'Sebelum mencetak, uji dengan ponsel yang tersambung ke Wi-Fi tempat ini: pindai kode QR dan pastikan halaman ambil nomor terbuka.',
       print: 'Cetak poster',
       qrAlt: 'Kode QR menuju halaman ambil nomor',
       qrError: 'Kode QR gagal dimuat. Muat ulang halaman, lalu coba lagi.',
+      wifiQrAlt: (ssid: string): string => `Kode QR untuk tersambung ke Wi-Fi ${ssid}`,
+      wifiQrError: 'Kode QR Wi-Fi gagal dimuat. Muat ulang halaman, lalu coba lagi.',
     },
   },
 
@@ -537,13 +598,29 @@ export const copy = {
   poster: {
     fallbackTitle: 'Antrean',
     headline: 'Ambil nomor antrean dari ponsel Anda',
+
+    // One-QR poster, used when no Wi-Fi is set. wifiLabel is followed by a blank write-in line.
     steps: [
-      'Sambungkan ponsel ke Wi-Fi tempat ini.',
+      'Sambungkan ponsel ke Wi-Fi tempat ini. Jika perlu kata sandi, tanyakan kepada petugas.',
       'Arahkan kamera ponsel ke kode QR ini, lalu buka tautannya.',
       'Pilih layanan. Nomor Anda tampil di ponsel dan dipanggil lewat layar TV.',
     ],
     wifiLabel: 'Nama Wi-Fi:',
     urlLabel: 'Tidak bisa memindai? Ketik alamat ini di ponsel:',
+
+    // Two-QR poster, used when a Wi-Fi name is set. The numerals 1 and 2 are printed as separate large figures,
+    // so the titles carry no number. wifiLabel is followed by the stored network name in bold.
+    twoStepLead: 'Pindai kedua kode QR ini berurutan dengan kamera ponsel.',
+    wifiStepTitle: 'Sambungkan ke Wi-Fi',
+    wifiStepBody: 'Ponsel tersambung ke Wi-Fi tempat ini tanpa mengetik kata sandi. Jika ponsel bertanya, setujui sambungannya.',
+    wifiManual: (needsPassword: boolean): string =>
+      needsPassword
+        ? 'Kode 1 tidak bisa dipindai? Pilih nama Wi-Fi di atas dari pengaturan Wi-Fi ponsel, lalu minta kata sandinya kepada petugas.'
+        : 'Kode 1 tidak bisa dipindai? Pilih nama Wi-Fi di atas dari pengaturan Wi-Fi ponsel.',
+    takeStepTitle: 'Ambil nomor',
+    takeStepBody:
+      'Setelah tersambung, pindai kode ini dan buka tautannya. Pilih layanan. Nomor Anda tampil di ponsel dan dipanggil lewat layar TV.',
+    urlLabelTwoStep: 'Kode 2 tidak bisa dipindai? Ketik alamat ini di ponsel:',
   },
 
   speech: {

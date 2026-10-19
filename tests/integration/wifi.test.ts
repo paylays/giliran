@@ -90,7 +90,7 @@ describe('GET /api/wifi-qr.svg', () => {
     const res = await req('/api/wifi-qr.svg');
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toBe('image/svg+xml');
-    expect(res.headers.get('cache-control')).toBe('public, max-age=300');
+    expect(res.headers.get('cache-control')).toBe('no-store');
     expect(await res.text()).toContain('<svg');
   });
 });
