@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { copy } from '../content/copy.ts';
 import type { LiveStatus } from '../lib/live.ts';
 import styles from './ConnectionStatus.module.css';
@@ -11,6 +11,12 @@ interface Props {
   recoveredAt: number | null;
   /** Business time zone for the "since" time. Defaults to the device zone. */
   timeZone?: string;
+  /** banner: reconnecting banner for phone, staff and admin. tv: the status line of the display page. */
+  variant?: 'banner' | 'tv';
+  /** TV only: left side of the status line. */
+  wordmark?: ReactNode;
+  /** TV only: sound state shown after the connection text while connected. */
+  soundText?: string;
 }
 
 function formatTime(epochMs: number, timeZone?: string): string {
@@ -23,7 +29,15 @@ function formatTime(epochMs: number, timeZone?: string): string {
  * Banner for the reconnecting and offline states, and a short "reconnected" notice after recovery.
  * The live region is always mounted so screen readers announce the text when it appears.
  */
-export function ConnectionStatus({ status, disconnectedSince, recoveredAt, timeZone }: Props) {
+export function ConnectionStatus({
+  status,
+  disconnectedSince,
+  recoveredAt,
+  timeZone,
+  variant = 'banner',
+  wordmark,
+  soundText,
+}: Props) {
   const [dismissedAt, setDismissedAt] = useState<number | null>(null);
 
   useEffect(() => {
@@ -34,6 +48,30 @@ export function ConnectionStatus({ status, disconnectedSince, recoveredAt, timeZ
 
   const down = status === 'reconnecting' || status === 'offline';
   const showRecovered = !down && status === 'live' && recoveredAt !== null && dismissedAt !== recoveredAt;
+
+  if (variant === 'tv') {
+    const sinceText =
+      status === 'offline'
+        ? copy.connection.offline
+        : disconnectedSince !== null
+          ? copy.connection.reconnectingSince(formatTime(disconnectedSince, timeZone))
+          : copy.connection.reconnectingBody;
+    const liveText = showRecovered
+      ? copy.connection.reconnected
+      : status === 'live'
+        ? soundText
+          ? `${copy.connection.connected} · ${soundText}`
+          : copy.connection.connected
+        : copy.connection.connecting;
+    return (
+      <div className={`${styles.strip} ${down ? styles.stripDown : ''}`}>
+        <span className={styles.stripMark}>{wordmark}</span>
+        <span role="status" className={styles.stripText}>
+          {down ? sinceText : liveText}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div role="status" className={styles.region}>

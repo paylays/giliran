@@ -1,0 +1,115 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: 12px 20px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: var(--leading-md);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.full {
+  width: 100%;
+}
+
+.lg {
+  min-height: 56px;
+}
+
+.xl {
+  min-height: 72px;
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.primary {
+  background: var(--color-teal-700);
+  border-color: var(--color-teal-700);
+  color: var(--color-cream-50);
+}
+
+.secondary {
+  background: var(--color-cream-50);
+  border-color: var(--color-teal-700);
+  color: var(--color-teal-700);
+}
+
+.danger {
+  background: var(--color-cream-50);
+  border-color: var(--color-danger-700);
+  color: var(--color-danger-700);
+}
+
+.dangerConfirm {
+  background: var(--color-danger-700);
+  border-color: var(--color-danger-700);
+  color: var(--color-cream-50);
+}
+
+.onTeal {
+  background: var(--color-cream-50);
+  border-color: var(--color-cream-50);
+  color: var(--color-teal-900);
+  font-weight: 700;
+}
+
+.onTeal:focus-visible {
+  outline-color: var(--color-focus-inverse);
+}
+
+.quiet {
+  background: transparent;
+  color: var(--color-teal-700);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .primary:hover:not([aria-disabled='true']) {
+    background: var(--color-teal-800);
+    border-color: var(--color-teal-800);
+  }
+
+  .secondary:hover:not([aria-disabled='true']),
+  .quiet:hover:not([aria-disabled='true']) {
+    background: var(--color-teal-100);
+  }
+
+  .danger:hover:not([aria-disabled='true']) {
+    background: var(--color-danger-100);
+  }
+}
+
+.primary:active:not([aria-disabled='true']) {
+  background: var(--color-teal-900);
+  border-color: var(--color-teal-900);
+}
+
+.secondary:active:not([aria-disabled='true']),
+.quiet:active:not([aria-disabled='true']) {
+  background: var(--color-teal-100);
+}
+
+.danger:active:not([aria-disabled='true']) {
+  background: var(--color-danger-100);
+}
+
+.button[aria-disabled='true'] {
+  background: var(--color-cream-200);
+  border-color: var(--color-cream-200);
+  color: var(--color-ink-600);
+  cursor: not-allowed;
+  text-decoration: none;
+}

@@ -1,0 +1,47 @@
+.dialog {
+  width: calc(100% - 2 * var(--space-4));
+  max-width: 440px;
+  max-height: calc(100dvh - 2 * var(--space-4));
+  margin: auto;
+  padding: var(--space-5);
+  border: 2px solid var(--color-teal-900);
+  border-radius: var(--radius-md);
+  background: var(--color-cream-50);
+  color: var(--color-ink-900);
+  overflow: auto;
+}
+
+.wide {
+  max-width: 560px;
+}
+
+.dialog::backdrop {
+  background: var(--color-scrim);
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: var(--leading-lg);
+}
+
+.content {
+  margin-top: var(--space-3);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 399px) {
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+}

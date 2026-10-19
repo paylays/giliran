@@ -25,3 +25,35 @@
   font-size: var(--text-sm);
   line-height: var(--leading-sm);
 }
+
+/* TV status line: the whole strip turns into a danger strip while the stream is down. */
+.strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tv-space-3);
+  min-height: calc(48 * var(--tv-px));
+  padding: 0 var(--tv-space-2);
+  background: transparent;
+  color: var(--color-ink-900);
+  font-size: var(--tv-status);
+  font-weight: 500;
+  line-height: var(--leading-xs);
+}
+
+.stripDown {
+  background: var(--color-danger-100);
+  color: var(--color-danger-700);
+  font-weight: 600;
+}
+
+.stripMark {
+  flex: none;
+  font-size: var(--tv-status);
+  font-weight: 800;
+}
+
+.stripText {
+  min-width: 0;
+  text-align: right;
+}
