@@ -1,5 +1,6 @@
 // Every UI string and spoken announcement in Giliran. Indonesian only.
-// Times arrive already formatted by the caller with Intl (locale id-ID, business timezone), e.g. "10.42".
+// Times arrive already formatted by the caller with Intl (locale id-ID, the `timeZone` from the snapshot, never
+// the device zone), e.g. "10.42". Dates use weekday, day, long month, year: "Senin, 19 Oktober 2026".
 // Ticket numbers arrive exactly as issued by the server, e.g. "A001".
 
 const DIGIT_WORDS = ['nol', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan'] as const;
@@ -166,7 +167,8 @@ export const copy = {
     loading: 'Memuat daftar layanan...',
     loadError: 'Daftar layanan gagal dimuat.',
     empty: 'Belum ada layanan yang dibuka. Tanyakan kepada petugas di lokasi.',
-    waitingCount: (count: number): string => (count === 0 ? 'Belum ada yang menunggu' : `${count} orang menunggu`),
+    // Today's waiting tickets in that service, from GET /api/services.
+    waitingCount: (count: number): string => (count === 0 ? 'Tidak ada yang menunggu' : `${count} orang menunggu`),
     prefixLabel: (prefix: string): string => `Nomor berawalan ${prefix}`,
     takeLabel: (service: string): string => `Ambil nomor untuk ${service}`,
     taking: 'Mengambil nomor...',
@@ -184,6 +186,8 @@ export const copy = {
     plateLabel: 'Nomor antrean Anda',
     service: (service: string): string => `Layanan ${service}`,
     takenAt: (time: string): string => `Diambil pukul ${time}`,
+    // Expired tickets come from an earlier day, so a time alone would read as today.
+    takenOnDate: (date: string, time: string): string => `Diambil pada ${date} pukul ${time}`,
     loading: 'Memuat nomor Anda...',
     loadError: 'Nomor Anda belum bisa dimuat. Pastikan ponsel tersambung ke Wi-Fi tempat ini.',
 
@@ -320,6 +324,15 @@ export const copy = {
     passwordRequired: 'Isi kata sandi.',
     invalid: 'Nama pengguna atau kata sandi salah.',
     rateLimited: 'Terlalu banyak percobaan masuk yang gagal. Tunggu satu menit, lalu coba lagi.',
+    // 429 too_many_attempts. `seconds` is the Retry-After value. The server counts failures per username and
+    // client address, so other usernames can still sign in from this device.
+    rateLimitedWait: (seconds: number): string => {
+      const lead = 'Terlalu banyak percobaan masuk yang gagal untuk nama pengguna ini.';
+      const whole = Math.ceil(seconds);
+      if (whole <= 0) return `${lead} Anda bisa mencoba lagi sekarang.`;
+      const wait = whole >= 60 ? `${Math.ceil(whole / 60)} menit` : `${whole} detik`;
+      return `${lead} Tunggu ${wait}, lalu coba lagi.`;
+    },
     forgot: 'Lupa kata sandi? Minta admin mengatur ulang dari halaman Petugas.',
     sessionExpired: 'Sesi Anda berakhir karena terlalu lama tidak aktif. Silakan masuk lagi.',
     loggedOut: 'Anda sudah keluar.',
@@ -333,6 +346,7 @@ export const copy = {
     changeCounter: 'Ganti loket',
     adminLink: 'Pengaturan admin',
     loading: 'Memuat data loket...',
+    loadError: 'Panel loket gagal dimuat.',
 
     // Pick a counter
     pickTitle: 'Pilih loket',
@@ -406,6 +420,8 @@ export const copy = {
     forbidden: 'Halaman ini khusus admin.',
     forbiddenAction: 'Ke panel loket',
     saveFailed: 'Perubahan gagal disimpan. Periksa isian yang ditandai, lalu coba lagi.',
+    // Banner title for a failed row action (activate, deactivate, reorder). No form is open, so nothing is marked.
+    actionFailedTitle: 'Perubahan tidak disimpan',
 
     settings: {
       title: 'Pengaturan umum',
@@ -533,6 +549,13 @@ export const copy = {
       deactivateTitle: (name: string): string => `Nonaktifkan ${name}?`,
       deactivateBody: 'Petugas tidak bisa memilih loket ini lagi. Anda bisa mengaktifkannya kembali kapan saja.',
       deactivateButton: (name: string): string => `Ya, nonaktifkan ${name}`,
+      // 409 counter_has_called_ticket: deactivating the counter, or unchecking the service of its called ticket.
+      // Shown as the form summary and as the row-action banner body.
+      calledTicketConflict:
+        'Loket ini sedang melayani nomor yang sudah dipanggil. Selama nomor itu belum selesai, loket ini tidak bisa dinonaktifkan dan layanan nomor itu harus tetap dicentang. Tekan Selesai atau Lewati untuk nomor itu di panel loket, lalu coba lagi.',
+      // 400 unknown_service: a checked service id the server does not have (stale list).
+      unknownService:
+        'Salah satu layanan yang dicentang tidak ditemukan. Muat ulang halaman agar daftar layanan terbaru tampil, lalu simpan lagi.',
     },
 
     users: {
@@ -553,7 +576,11 @@ export const copy = {
       displayName: 'Nama tampilan',
       displayNameHint: 'Tampil di panel loket.',
       username: 'Nama pengguna',
-      usernameHint: 'Dipakai untuk masuk. Tanpa spasi. Huruf besar otomatis diubah menjadi huruf kecil.',
+      usernameHint:
+        'Dipakai untuk masuk. 3 sampai 32 karakter: huruf a-z, angka 0-9, titik, garis bawah, atau tanda hubung, tanpa spasi. Huruf besar otomatis diubah menjadi huruf kecil.',
+      // Server rule in createUserBody, checked after trim and lowercase: /^[a-z0-9._-]{3,32}$/.
+      usernameInvalid:
+        'Nama pengguna harus 3 sampai 32 karakter dan hanya berisi huruf a-z, angka 0-9, titik (.), garis bawah (_), atau tanda hubung (-).',
       usernameTaken: 'Nama pengguna ini sudah dipakai.',
       initialPassword: 'Kata sandi awal',
       passwordHint: (min: number): string => `Minimal ${min} karakter. Sampaikan langsung kepada petugas yang bersangkutan.`,
