@@ -62,15 +62,22 @@ const servicePrefix = z
   .transform((v) => v.toUpperCase())
   .pipe(z.string().regex(/^[A-Z0-9]{1,3}$/, 'Prefix is 1-3 letters or digits'));
 
+const numberWidth = z.number().int().min(1).max(6);
+
 export const createServiceBody = z.object({
   name,
   prefix: servicePrefix,
-  numberWidth: z.number().int().min(1).max(6).default(3),
+  numberWidth: numberWidth.default(3),
   sortOrder: z.number().int().default(0),
 });
 export type CreateServiceBody = z.infer<typeof createServiceBody>;
 
-export const updateServiceBody = createServiceBody.partial().extend({
+// Spelled out instead of partial(): partial() would re-apply the create defaults to omitted fields.
+export const updateServiceBody = z.object({
+  name: name.optional(),
+  prefix: servicePrefix.optional(),
+  numberWidth: numberWidth.optional(),
+  sortOrder: z.number().int().optional(),
   active: z.boolean().optional(),
 });
 export type UpdateServiceBody = z.infer<typeof updateServiceBody>;
@@ -116,6 +123,48 @@ export type UpdateUserBody = z.infer<typeof updateUserBody>;
 
 export const resetPasswordBody = z.object({ password });
 export type ResetPasswordBody = z.infer<typeof resetPasswordBody>;
+
+// ---- API response shapes ----
+
+export interface AuthUser {
+  id: number;
+  username: string;
+  displayName: string;
+  role: 'admin' | 'staff';
+}
+
+export interface SettingsDto {
+  businessName: string;
+  timezone: string;
+  nearThreshold: number;
+}
+
+export interface ServiceDto {
+  id: number;
+  name: string;
+  prefix: string;
+  numberWidth: number;
+  active: boolean;
+  sortOrder: number;
+}
+
+export interface CounterDto {
+  id: number;
+  name: string;
+  active: boolean;
+  sortOrder: number;
+  serviceIds: number[];
+}
+
+export interface UserDto extends AuthUser {
+  active: boolean;
+  createdAt: number;
+}
+
+export interface PublicServicesResponse {
+  businessName: string;
+  services: { id: number; name: string; prefix: string }[];
+}
 
 // ---- Snapshots ----
 // Each stream sends the whole view state on every message; serverTime is epoch ms.
