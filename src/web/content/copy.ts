@@ -55,8 +55,8 @@ export function numberToWordsId(value: number): string {
 /**
  * Ticket number as the voice should say it: prefix spelled letter by letter, then the
  * sequence as a whole number without leading zeros. "A001" -> "a satu", "B123" -> "bé seratus dua puluh tiga".
- * Pass the service prefix when known: a prefix that ends in a digit cannot be told apart
- * from the sequence by looking at the number alone ("A2" + "001" reads as "A2001").
+ * Prefixes are letters only, so the leading letters of the number are the prefix;
+ * pass `prefix` to override that split.
  */
 export function spokenTicketNumber(ticketNumber: string, prefix?: string): string {
   const text = ticketNumber.trim().toUpperCase();
