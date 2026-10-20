@@ -249,12 +249,23 @@
   --number-size: calc(48 * var(--u));
 }
 
+/*
+ * The three rows share one tab width, set from the widest name by RecentCalls. The cap leaves the
+ * number cell at least 161 design px of the 408 px column.
+ */
 .mini > div > div > span:first-child {
-  width: auto;
+  width: var(--mini-tab, auto);
   min-width: calc(182 * var(--u));
-  max-width: 55%;
-  white-space: nowrap;
+  max-width: calc(247 * var(--u));
   overflow: hidden;
+}
+
+.mini > div [data-tab-text] {
+  display: block;
+  line-height: var(--leading-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* QR area */
@@ -314,9 +325,10 @@
 }
 
 /*
- * Right column. The page measures overflow and raises data-level (0 to 3) until everything fits:
- * level 1 steps the numbers down, level 2 tightens gaps and padding, level 3 also hides the
- * two headings visually (they stay for screen readers). Numbers never go below 64 design px.
+ * Right column. The page measures overflow and raises data-level (0 to 4) until everything fits:
+ * level 1 steps the numbers down, level 2 tightens gaps and padding, level 3 tightens them further and
+ * keeps the counters heading for screen readers only. Level 4 cuts counter names to one line.
+ * The waiting heading stays visible at every level. Numbers never go below 64 design px.
  */
 .right {
   --gap: calc(16 * var(--u));
@@ -375,27 +387,30 @@
   --tab-lh: 1.2;
 }
 
-.right[data-level='3'] {
+.right[data-level='3'],
+.right[data-level='4'] {
   --tab-lh: 1.1;
   --n: var(--n3);
-  --box-pv: 2;
+  --box-pv: 0;
   --gap: calc(8 * var(--u));
-  --row-h: calc(56 * var(--u));
+  --row-h: calc(48 * var(--u));
   --section-gap: calc(16 * var(--u));
   --tab-pv: 4;
 }
 
-.right[data-level='3'] .heading {
+.counters {
+  flex: none;
+}
+
+/* From level 3 the counters heading is for screen readers only; the waiting heading stays visible. */
+.right[data-level='3'] .counters > .heading,
+.right[data-level='4'] .counters > .heading {
   position: absolute;
   width: 1px;
   height: 1px;
   margin: -1px;
   overflow: hidden;
   clip-path: inset(50%);
-}
-
-.counters {
-  flex: none;
 }
 
 .plates {
@@ -422,18 +437,29 @@
 }
 
 .right[data-tier='3'] .cell > div {
-  --tab-pad: calc(var(--tab-pv) * var(--u)) calc(12 * var(--u));
-  --box-pad: calc(var(--box-pv) * var(--u)) calc(12 * var(--u));
+  --tab-pad: calc(var(--tab-pv) * var(--u)) calc(8 * var(--u));
+  --box-pad: calc(var(--box-pv) * var(--u)) calc(8 * var(--u));
 }
 
-.cell > div > span:first-child {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.right[data-level='3'] .cell > div > div > span {
+.right[data-level='3'] .cell > div > div > span,
+.right[data-level='4'] .cell > div > div > span {
   line-height: 1;
+}
+
+/* Level 4 is the last resort for a crowded screen: names drop to one line with an ellipsis. */
+.right[data-level='4'] .cell [data-tab-text] > span:first-child:not(:only-child) {
+  display: none;
+}
+
+.right[data-level='4'] .cell [data-tab-text] > span + span {
+  display: inline;
+}
+
+.right[data-level='4'] .cell [data-tab-text] {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Two columns leave a name only about 230 design px, so the unit is dropped there; the row label still says "orang". */

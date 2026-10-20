@@ -17,6 +17,23 @@ export function useFit(fit: () => void, deps: readonly unknown[]): void {
 }
 
 /**
+ * Marks every counter name that has a word wider than its tab, or needs more than two lines,
+ * so CSS can step it down to 40 design px.
+ * Names are reset first, so a rename measures from the full size again.
+ */
+export function fitNames(root: HTMLElement | null): void {
+  if (!root) return;
+  const names = Array.from(root.querySelectorAll<HTMLElement>('[data-tab-text]'));
+  names.forEach((el) => el.removeAttribute('data-fit'));
+  names.forEach((el) => {
+    const tooWide = el.scrollWidth > el.clientWidth + 0.5;
+    // A clamped third line overflows by a line; the glyph overhang of one or two lines stays under half an em.
+    const tooTall = el.scrollHeight - el.clientHeight > parseFloat(getComputedStyle(el).fontSize) * 0.5;
+    if (tooWide || tooTall) el.setAttribute('data-fit', 'small');
+  });
+}
+
+/**
  * Steps data-level up from 0 until the last child ends inside the element. Child boxes are measured
  * instead of scrollHeight, which also counts out-of-flow screen-reader text.
  */

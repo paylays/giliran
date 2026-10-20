@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ConnectionStatus } from '../../components/ConnectionStatus.tsx';
 import { copy } from '../../content/copy.ts';
-import { createCallTracker, enqueueCallAnnouncement, playChime, unlockAudio, useAudioStatus } from '../../lib/announce.ts';
+import { createCallTracker, enqueueCallAnnouncement, playChime, unlockAudio, unlockAudioIfAllowed, useAudioStatus } from '../../lib/announce.ts';
 import { useLiveSnapshot } from '../../lib/live.ts';
 import type { DisplaySnapshot } from '../../../shared/contracts.ts';
 import { CallField } from './CallField.tsx';
@@ -15,7 +15,7 @@ import { useCallFlash } from './useCallFlash.ts';
 import { fitLevels, useFit } from './useFit.ts';
 import styles from './DisplayPage.module.css';
 
-const FIT_LEVELS = 4;
+const FIT_LEVELS = 5;
 
 export function DisplayPage() {
   const { snapshot, status, serverOffset, disconnectedSince, recoveredAt } = useLiveSnapshot<DisplaySnapshot>(
@@ -52,6 +52,15 @@ export function DisplayPage() {
     const unlocked = unlockAudio();
     setStarted(true);
     void unlocked.then((ok) => (ok ? playChime('call') : undefined));
+  }, []);
+
+  // Kiosk browsers that allow autoplay skip the Start overlay, so an unattended TV recovers after a reboot.
+  useEffect(() => {
+    void unlockAudioIfAllowed().then((ok) => {
+      if (!ok || startedRef.current) return;
+      startedRef.current = true;
+      setStarted(true);
+    });
   }, []);
 
   const counterCount = snapshot?.counters.length ?? 0;

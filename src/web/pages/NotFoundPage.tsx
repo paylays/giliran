@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { Link } from 'wouter';
+import { LinkButton } from '../components/LinkButton.tsx';
 import { copy } from '../content/copy.ts';
-import styles from '../components/PageStub.module.css';
+import styles from './login/login.module.css';
 
 export function NotFoundPage() {
   useEffect(() => {
@@ -10,11 +10,16 @@ export function NotFoundPage() {
 
   return (
     <main className={styles.page}>
-      <h1>{copy.states.notFoundTitle}</h1>
-      <p>{copy.states.notFoundBody}</p>
-      <p>
-        <Link href="/take">{copy.states.notFoundAction}</Link>
-      </p>
+      <p className={styles.wordmark}>{copy.app.name}</p>
+      <div className={styles.head}>
+        <h1>{copy.states.notFoundTitle}</h1>
+        <p className={styles.lead}>{copy.states.notFoundBody}</p>
+      </div>
+      <div className={styles.form}>
+        <LinkButton href="/take" fullWidth>
+          {copy.states.notFoundAction}
+        </LinkButton>
+      </div>
     </main>
   );
 }

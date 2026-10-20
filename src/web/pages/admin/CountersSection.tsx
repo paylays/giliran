@@ -17,6 +17,8 @@ import { useDocTitle } from './useDocTitle.ts';
 import styles from './admin.module.css';
 
 const t = copy.admin.counters;
+// The TV layout is built for at most 12 active counters.
+const TV_COUNTER_LIMIT = 12;
 
 function serviceNames(counter: CounterDto, services: ServiceDto[]): string {
   const names = services.filter((service) => counter.serviceIds.includes(service.id)).map((service) => service.name);
@@ -97,6 +99,9 @@ export function CountersSection() {
         <Banner variant="error" title={copy.admin.actionFailedTitle}>
           <p>{actionError}</p>
         </Banner>
+      )}
+      {list.filter((counter) => counter.active).length > TV_COUNTER_LIMIT && (
+        <Banner variant="warning" title={t.tvLimitNote} />
       )}
       {list.length === 0 ? (
         <StateView kind="empty" message={t.empty} />

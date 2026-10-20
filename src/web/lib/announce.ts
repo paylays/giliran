@@ -46,6 +46,27 @@ export async function unlockAudio(): Promise<boolean> {
   return ctx.state === 'running';
 }
 
+/**
+ * Unlocks audio without a gesture when the browser allows it (kiosk Chrome started with
+ * --autoplay-policy=no-user-gesture-required). Resolves false in a normal browser, which needs a click.
+ */
+export async function unlockAudioIfAllowed(): Promise<boolean> {
+  const policy = (navigator as unknown as { getAutoplayPolicy?: (type: string) => string }).getAutoplayPolicy?.(
+    'audiocontext',
+  );
+  if (policy !== undefined && policy !== 'allowed') return false;
+  const ctx = getContext();
+  if (!ctx) return false;
+  if (ctx.state !== 'running') {
+    // A blocked resume() never settles, so do not wait for it past a short grace period.
+    await Promise.race([ctx.resume().catch(() => undefined), sleep(500)]);
+  }
+  if ((ctx.state as AudioContextState) !== 'running') return false;
+  loadVoices();
+  emitAudioChange();
+  return true;
+}
+
 /** Plays the chime. Resolves when it ends; resolves at once, silent, when audio is still locked. */
 export async function playChime(kind: ChimeKind = 'call'): Promise<void> {
   const ctx = getContext();
@@ -150,7 +171,11 @@ function speak(text: string): Promise<void> {
       if (activeUtterance === utterance) activeUtterance = null;
       resolve();
     };
-    const timeout = window.setTimeout(done, SPEECH_FALLBACK_MS);
+    // A stalled utterance would block later ones in Chrome's queue, so drop it before moving on.
+    const timeout = window.setTimeout(() => {
+      window.speechSynthesis.cancel();
+      done();
+    }, SPEECH_FALLBACK_MS);
     utterance.addEventListener('end', done);
     utterance.addEventListener('error', done);
     window.speechSynthesis.speak(utterance);

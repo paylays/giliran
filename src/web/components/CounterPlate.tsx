@@ -7,6 +7,8 @@ export type PlateSize = 'ticket' | 'staffCurrent' | 'staffNext' | 'tvLg' | 'tvMd
 interface PlateProps {
   /** Text of the tab: the counter name, or what the number is. Never empty. */
   label: string;
+  /** Shorter text for a crowded TV screen. Hidden from assistive technology; `label` is the accessible name. */
+  shortLabel?: string;
   /** The queue number exactly as issued, or the empty-plate text when `muted` is set. */
   children: ReactNode;
   size?: PlateSize;
@@ -29,6 +31,7 @@ interface PlateProps {
  */
 export function CounterPlate({
   label,
+  shortLabel,
   children,
   size = 'ticket',
   layout = 'stacked',
@@ -50,7 +53,14 @@ export function CounterPlate({
       )}
     >
       <span className={styles.tab}>
-        <span className={styles.tabText}>{label}</span>
+        <span className={styles.tabText} data-tab-text="">
+          <span className={styles.tabFull}>{label}</span>
+          {shortLabel && shortLabel !== label && (
+            <span className={styles.tabShort} aria-hidden="true">
+              {shortLabel}
+            </span>
+          )}
+        </span>
       </span>
       <div className={styles.box}>
         <span className={cx(styles.number, muted && styles.muted)}>{children}</span>
