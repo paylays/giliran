@@ -9,6 +9,7 @@ export interface FailureLimiter {
 export function createFailureLimiter(opts: { max: number; windowMs: number; now: () => number }): FailureLimiter {
   const hits = new Map<string, number[]>();
   const SWEEP_ABOVE = 1000;
+  let lastSweep = 0;
 
   function live(key: string): number[] {
     const cutoff = opts.now() - opts.windowMs;
@@ -26,8 +27,12 @@ export function createFailureLimiter(opts: { max: number; windowMs: number; now:
       return Math.max(1, Math.ceil((oldest + opts.windowMs - opts.now()) / 1000));
     },
     fail(key) {
-      // Keys that are never touched again would otherwise stay forever.
-      if (hits.size > SWEEP_ABOVE) for (const k of [...hits.keys()]) live(k);
+      // Keys that are never touched again would otherwise stay forever. Sweeping at most once
+      // per window keeps a flood of distinct keys from making every call O(map size).
+      if (hits.size > SWEEP_ABOVE && opts.now() - lastSweep >= opts.windowMs) {
+        lastSweep = opts.now();
+        for (const k of [...hits.keys()]) live(k);
+      }
       const recent = live(key);
       recent.push(opts.now());
       hits.set(key, recent);
