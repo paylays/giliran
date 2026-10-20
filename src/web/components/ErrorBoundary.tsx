@@ -38,6 +38,7 @@ function writeAttempts(count: number): void {
 export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   state: State = { crashed: false };
   private reloadTimer: number | undefined;
+  private reloadDelay: number | undefined;
   private healthyTimer: number | undefined;
 
   componentDidMount(): void {
@@ -59,10 +60,14 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
     // An unattended TV has nobody to press the button, so /display reloads itself: 30 s, 60 s, 120 s, up to 5 min.
     if (!isDisplayPage()) return;
     window.clearTimeout(this.healthyTimer);
-    const attempts = readAttempts();
-    writeAttempts(attempts + 1);
-    const delay = Math.min(FIRST_RELOAD_MS * 2 ** attempts, MAX_RELOAD_MS);
-    this.reloadTimer = window.setTimeout(() => window.location.reload(), delay);
+    // A repeat catch in the same page life is the same crash episode: re-arm the timer, count no new attempt.
+    window.clearTimeout(this.reloadTimer);
+    if (this.reloadDelay === undefined) {
+      const attempts = readAttempts();
+      writeAttempts(attempts + 1);
+      this.reloadDelay = Math.min(FIRST_RELOAD_MS * 2 ** attempts, MAX_RELOAD_MS);
+    }
+    this.reloadTimer = window.setTimeout(() => window.location.reload(), this.reloadDelay);
   }
 
   render() {

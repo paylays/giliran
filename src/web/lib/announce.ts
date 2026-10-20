@@ -37,6 +37,8 @@ function getContext(): AudioContext | null {
 export async function unlockAudio(): Promise<boolean> {
   const ctx = getContext();
   if (!ctx) return false;
+  // Voices do not depend on the context, so a resume() that never settles cannot leave speech unloaded.
+  loadVoices();
   if (ctx.state !== 'running') {
     try {
       await ctx.resume();
@@ -75,11 +77,8 @@ export async function playChime(kind: ChimeKind = 'call'): Promise<void> {
   const ctx = getContext();
   if (!ctx) return;
   if (ctx.state !== 'running') {
-    try {
-      await ctx.resume();
-    } catch {
-      return;
-    }
+    // A blocked resume() never settles; waiting on it would hold the whole announcement queue.
+    await Promise.race([ctx.resume().catch(() => undefined), sleep(500)]);
     if ((ctx.state as AudioContextState) !== 'running') return;
   }
 
@@ -178,6 +177,8 @@ function speak(text: string): Promise<void> {
     // Cancelling is only for speech that never starts or runs far past its expected length.
     const giveUp = () => {
       window.speechSynthesis.cancel();
+      // A paused synth would stall every later utterance; resume() is a no-op when not paused.
+      window.speechSynthesis.resume();
       done();
     };
     let timeout = window.setTimeout(giveUp, SPEECH_START_STALL_MS);

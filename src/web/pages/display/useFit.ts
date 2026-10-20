@@ -1,7 +1,16 @@
-import { useLayoutEffect, type RefObject } from 'react';
+import { useLayoutEffect, useRef, type RefObject } from 'react';
 
-/** Runs `fit` after layout and again once web fonts have loaded, because glyph widths change. */
+const RESIZE_DEBOUNCE_MS = 150;
+
+/**
+ * Runs `fit` after layout, again once web fonts have loaded (glyph widths change), and again after
+ * the window stops resizing.
+ */
 export function useFit(fit: () => void, deps: readonly unknown[]): void {
+  const latest = useRef(fit);
+  useLayoutEffect(() => {
+    latest.current = fit;
+  });
   useLayoutEffect(() => {
     fit();
     let cancelled = false;
@@ -14,6 +23,19 @@ export function useFit(fit: () => void, deps: readonly unknown[]): void {
     // `fit` only touches refs; the caller lists what should trigger a new measurement.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
+
+  useLayoutEffect(() => {
+    let timer: number | undefined;
+    const onResize = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => latest.current(), RESIZE_DEBOUNCE_MS);
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
 }
 
 /**
@@ -33,6 +55,8 @@ export function fitNames(root: HTMLElement | null): void {
   });
 }
 
+let overflowWarned = false;
+
 /**
  * Steps data-level up from 0 until the last child ends inside the element. Child boxes are measured
  * instead of scrollHeight, which also counts out-of-flow screen-reader text.
@@ -43,6 +67,18 @@ export function fitLevels(ref: RefObject<HTMLElement | null>, levels: number): v
   for (let level = 0; level < levels; level += 1) {
     el.dataset.level = String(level);
     const bottom = el.getBoundingClientRect().bottom;
-    if (Array.from(el.children).every((child) => child.getBoundingClientRect().bottom <= bottom + 0.5)) return;
+    if (Array.from(el.children).every((child) => child.getBoundingClientRect().bottom <= bottom + 0.5)) {
+      overflowWarned = false;
+      return;
+    }
   }
+  // The last level was applied and still overflows. Log once per episode, not on every pass.
+  if (overflowWarned) return;
+  overflowWarned = true;
+  const available = el.getBoundingClientRect().height;
+  const content = Array.from(el.children).reduce(
+    (max, child) => Math.max(max, child.getBoundingClientRect().bottom - el.getBoundingClientRect().top),
+    0,
+  );
+  console.warn(`TV right column overflows at the last fit level: content ${Math.round(content)}px, available ${Math.round(available)}px.`);
 }
