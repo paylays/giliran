@@ -143,3 +143,7 @@ Node 24, Hono, Server-Sent Events, SQLite (`node:sqlite`), Zod, QR codes with `q
 - [Server setup on a LAN](docs/setup-lan.md): network, firewall, Wi-Fi QR, poster.
 - [TV display setup](docs/display-setup.md): the device, sound and voice, kiosk mode.
 - [Operations](docs/operations.md): daily use, backup and restore, migration rollback, upgrades, troubleshooting.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
