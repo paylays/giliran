@@ -14,8 +14,8 @@ The page is `http://<server-ip>:3000/display`. Admins also get a **Buka layar TV
 
 - The latest call (**Nomor dipanggil**) with the counter to go to.
 - Each counter (**Loket**) and its current number.
-- **Panggilan sebelumnya**, the recent calls.
-- **Menunggu**, how many people wait per service.
+- **Sebelumnya**, the recent calls.
+- **Menunggu**, how many people wait per service. When the screen is full, this collapses into one **Semua layanan** total.
 - The QR code. With the venue Wi-Fi QR configured it shows two codes: **1. Sambungkan ke Wi-Fi** and **2. Ambil nomor**. Otherwise one code, **Pindai untuk ambil nomor**.
 - A status line with the connection and sound state.
 
