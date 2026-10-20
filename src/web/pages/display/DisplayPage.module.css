@@ -196,7 +196,10 @@
 
 .fieldCounter[data-wrap='yes'] {
   display: -webkit-box;
+  /* Same descender clip as the plate names. */
   overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: 0.16em;
   line-height: 1;
   white-space: normal;
   overflow-wrap: anywhere;

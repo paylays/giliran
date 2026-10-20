@@ -81,7 +81,10 @@
 .tvMd .tabText,
 .tvSm .tabText {
   display: -webkit-box;
+  /* line-height 1 puts the clip edge above the descenders of g, j, p, q, y; clip with a margin instead. */
   overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: 0.16em;
   overflow-wrap: normal;
   line-height: 1;
   text-wrap: balance;
