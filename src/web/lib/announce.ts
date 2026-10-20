@@ -16,7 +16,10 @@ const CHIME_TONES: Record<ChimeKind, { freq: number; ms: number }[]> = {
 const CHIME_PEAK_GAIN = 0.3;
 const ATTACK_S = 0.01;
 const PAUSE_AFTER_CHIME_MS = 300;
-const SPEECH_FALLBACK_MS = 8000;
+// Limit for an utterance that never starts, then a limit that grows with the text once it has.
+const SPEECH_START_STALL_MS = 5000;
+const SPEECH_BASE_MS = 3000;
+const SPEECH_PER_CHAR_MS = 120;
 const MAX_CALL_AGE_MS = 30_000;
 
 let context: AudioContext | null = null;
@@ -172,10 +175,17 @@ function speak(text: string): Promise<void> {
       resolve();
     };
     // A stalled utterance would block later ones in Chrome's queue, so drop it before moving on.
-    const timeout = window.setTimeout(() => {
+    // Cancelling is only for speech that never starts or runs far past its expected length.
+    const giveUp = () => {
       window.speechSynthesis.cancel();
       done();
-    }, SPEECH_FALLBACK_MS);
+    };
+    let timeout = window.setTimeout(giveUp, SPEECH_START_STALL_MS);
+    utterance.addEventListener('start', () => {
+      if (finished) return;
+      window.clearTimeout(timeout);
+      timeout = window.setTimeout(giveUp, SPEECH_BASE_MS + SPEECH_PER_CHAR_MS * text.length);
+    });
     utterance.addEventListener('end', done);
     utterance.addEventListener('error', done);
     window.speechSynthesis.speak(utterance);

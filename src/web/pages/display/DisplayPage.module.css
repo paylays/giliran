@@ -251,12 +251,12 @@
 
 /*
  * The three rows share one tab width, set from the widest name by RecentCalls. The cap leaves the
- * number cell at least 161 design px of the 408 px column.
+ * number cell at least 161 design px of the column, whatever width the QR area leaves it.
  */
 .mini > div > div > span:first-child {
   width: var(--mini-tab, auto);
   min-width: calc(182 * var(--u));
-  max-width: calc(247 * var(--u));
+  max-width: calc(100% - 161 * var(--u));
   overflow: hidden;
 }
 
@@ -327,7 +327,8 @@
 /*
  * Right column. The page measures overflow and raises data-level (0 to 4) until everything fits:
  * level 1 steps the numbers down, level 2 tightens gaps and padding, level 3 tightens them further and
- * keeps the counters heading for screen readers only. Level 4 cuts counter names to one line.
+ * keeps the counters heading for screen readers only. Level 4 swaps the per-service waiting rows for one
+ * total row. Counter names are never cut to make room.
  * The waiting heading stays visible at every level. Numbers never go below 64 design px.
  */
 .right {
@@ -446,22 +447,6 @@
   line-height: 1;
 }
 
-/* Level 4 is the last resort for a crowded screen: names drop to one line with an ellipsis. */
-.right[data-level='4'] .cell [data-tab-text] > span:first-child:not(:only-child) {
-  display: none;
-}
-
-.right[data-level='4'] .cell [data-tab-text] > span + span {
-  display: inline;
-}
-
-.right[data-level='4'] .cell [data-tab-text] {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /* Two columns leave a name only about 230 design px, so the unit is dropped there; the row label still says "orang". */
 .waitingList[data-columns='2'] .serviceUnit {
   display: none;
@@ -493,6 +478,20 @@
   gap: calc(8 * var(--u));
   min-width: 0;
   border-bottom: 1px solid var(--color-cream-200);
+}
+
+/* The total row only replaces the per-service list at fit level 4. */
+.waitingTotal {
+  display: none;
+  height: var(--row-h);
+}
+
+.right[data-level='4'] .waitingList {
+  display: none;
+}
+
+.right[data-level='4'] .waitingTotal {
+  display: flex;
 }
 
 .serviceName {

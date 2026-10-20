@@ -14,6 +14,7 @@ import { FocusBanner } from './FocusBanner.tsx';
 import { SectionHead } from './SectionHead.tsx';
 import { isTooBig, issuesOf, useFailure, useResource } from './useApi.ts';
 import { useDocTitle } from './useDocTitle.ts';
+import { useTvCutNames } from './tvNames.ts';
 import styles from './admin.module.css';
 
 const t = copy.admin.counters;
@@ -38,6 +39,11 @@ export function CountersSection() {
   const [toDeactivate, setToDeactivate] = useState<CounterDto | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const activeNames =
+    counters.state.status === 'ready'
+      ? counters.state.data.counters.filter((counter) => counter.active).map((counter) => counter.name)
+      : [];
+  const cutNames = useTvCutNames(activeNames);
 
   const openForm = (counter: CounterDto | null) =>
     setForm((current) => ({ counter, nonce: current.nonce + 1, open: true }));
@@ -100,8 +106,11 @@ export function CountersSection() {
           <p>{actionError}</p>
         </Banner>
       )}
-      {list.filter((counter) => counter.active).length > TV_COUNTER_LIMIT && (
-        <Banner variant="warning" title={t.tvLimitNote} />
+      {activeNames.length > TV_COUNTER_LIMIT && <Banner variant="warning" title={t.tvLimitNote} />}
+      {activeNames.length <= TV_COUNTER_LIMIT && cutNames.length > 0 && (
+        <Banner variant="warning" title={t.tvNamesCutTitle}>
+          <p>{t.tvNamesCutBody(activeNames.length, cutNames)}</p>
+        </Banner>
       )}
       {list.length === 0 ? (
         <StateView kind="empty" message={t.empty} />

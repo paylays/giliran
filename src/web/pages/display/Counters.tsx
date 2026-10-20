@@ -1,9 +1,6 @@
-import { useRef } from 'react';
 import { copy } from '../../content/copy.ts';
 import type { DisplayCounter } from '../../../shared/contracts.ts';
 import { CounterPlate, type PlateSize } from '../../components/CounterPlate.tsx';
-import { shortenName } from '../../lib/names.ts';
-import { fitNames, useFit } from './useFit.ts';
 import styles from './DisplayPage.module.css';
 
 interface Props {
@@ -18,10 +15,8 @@ export function Counters({ counters, flashing, flashInverted }: Props) {
   const count = counters.length;
   const tier = count <= 4 ? 1 : count <= 8 ? 2 : 3;
   const size: PlateSize = tier === 1 ? 'tvLg' : tier === 2 ? 'tvMd' : 'tvSm';
-  const section = useRef<HTMLElement>(null);
-  useFit(() => fitNames(section.current), [counters]);
   return (
-    <section ref={section} className={styles.counters} data-tier={tier}>
+    <section className={styles.counters} data-tier={tier}>
       <h2 className={styles.heading}>{copy.display.countersHeading}</h2>
       {count === 0 ? (
         <p className={styles.quiet}>{copy.display.countersNone}</p>
@@ -31,7 +26,6 @@ export function Counters({ counters, flashing, flashInverted }: Props) {
             <li key={counter.id} className={styles.cell}>
               <CounterPlate
                 label={counter.name}
-                shortLabel={shortenName(counter.name)}
                 size={size}
                 layout={tier === 1 ? 'side' : 'stacked'}
                 inverted={flashing === counter.name && flashInverted}

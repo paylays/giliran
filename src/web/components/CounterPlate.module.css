@@ -89,11 +89,6 @@
   -webkit-box-orient: vertical;
 }
 
-/* The short form only shows when a screen asks for it. */
-.tabShort {
-  display: none;
-}
-
 .tabText[data-fit='small'] {
   font-size: var(--tv-label);
   overflow-wrap: anywhere;
@@ -119,7 +114,11 @@
   white-space: nowrap;
 }
 
+/* An empty plate keeps the height of a numbered one, so a counter that starts or stops serving never changes the fit. */
 .muted {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--number-size) * var(--leading-num));
   font-size: var(--tv-label);
   font-weight: 600;
   line-height: var(--leading-lg);
@@ -169,9 +168,13 @@
   height: 100%;
 }
 
+/* In a stretched plate the number sits at the bottom, so the numbers of one row share a baseline. */
 .tvMd .box,
 .tvSm:not(.side) .box {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .inverted .box {

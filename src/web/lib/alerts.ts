@@ -12,10 +12,11 @@ export function canVibrate(): boolean {
 }
 
 // Chrome blocks vibrate() and refuses to start audio until the visitor has interacted with the page.
+// Browsers without userActivation report undefined and are allowed to try.
 let audioUnlocked = false;
 
 function vibrate(pattern: number[]): boolean {
-  return canVibrate() && navigator.userActivation?.hasBeenActive === true && navigator.vibrate(pattern);
+  return canVibrate() && navigator.userActivation?.hasBeenActive !== false && navigator.vibrate(pattern);
 }
 
 function chime(kind: 'call' | 'near'): void {
