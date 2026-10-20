@@ -196,7 +196,10 @@
 
 .fieldCounter[data-wrap='yes'] {
   display: -webkit-box;
+  /* Same descender clip as the plate names. */
   overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: 0.16em;
   line-height: 1;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -249,12 +252,23 @@
   --number-size: calc(48 * var(--u));
 }
 
+/*
+ * The three rows share one tab width, set from the widest name by RecentCalls. The cap leaves the
+ * number cell at least 161 design px of the column, whatever width the QR area leaves it.
+ */
 .mini > div > div > span:first-child {
-  width: auto;
+  width: var(--mini-tab, auto);
   min-width: calc(182 * var(--u));
-  max-width: 55%;
-  white-space: nowrap;
+  max-width: calc(100% - 161 * var(--u));
   overflow: hidden;
+}
+
+.mini > div [data-tab-text] {
+  display: block;
+  line-height: var(--leading-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* QR area */
@@ -314,9 +328,11 @@
 }
 
 /*
- * Right column. The page measures overflow and raises data-level (0 to 3) until everything fits:
- * level 1 steps the numbers down, level 2 tightens gaps and padding, level 3 also hides the
- * two headings visually (they stay for screen readers). Numbers never go below 64 design px.
+ * Right column. The page measures overflow and raises data-level (0 to 4) until everything fits:
+ * level 1 steps the numbers down, level 2 tightens gaps and padding, level 3 tightens them further and
+ * keeps the counters heading for screen readers only. Level 4 swaps the per-service waiting rows for one
+ * total row. Counter names are never cut to make room.
+ * The waiting heading stays visible at every level. Numbers never go below 64 design px.
  */
 .right {
   --gap: calc(16 * var(--u));
@@ -375,27 +391,30 @@
   --tab-lh: 1.2;
 }
 
-.right[data-level='3'] {
+.right[data-level='3'],
+.right[data-level='4'] {
   --tab-lh: 1.1;
   --n: var(--n3);
-  --box-pv: 2;
+  --box-pv: 0;
   --gap: calc(8 * var(--u));
-  --row-h: calc(56 * var(--u));
+  --row-h: calc(48 * var(--u));
   --section-gap: calc(16 * var(--u));
   --tab-pv: 4;
 }
 
-.right[data-level='3'] .heading {
+.counters {
+  flex: none;
+}
+
+/* From level 3 the counters heading is for screen readers only; the waiting heading stays visible. */
+.right[data-level='3'] .counters > .heading,
+.right[data-level='4'] .counters > .heading {
   position: absolute;
   width: 1px;
   height: 1px;
   margin: -1px;
   overflow: hidden;
   clip-path: inset(50%);
-}
-
-.counters {
-  flex: none;
 }
 
 .plates {
@@ -422,17 +441,12 @@
 }
 
 .right[data-tier='3'] .cell > div {
-  --tab-pad: calc(var(--tab-pv) * var(--u)) calc(12 * var(--u));
-  --box-pad: calc(var(--box-pv) * var(--u)) calc(12 * var(--u));
+  --tab-pad: calc(var(--tab-pv) * var(--u)) calc(8 * var(--u));
+  --box-pad: calc(var(--box-pv) * var(--u)) calc(8 * var(--u));
 }
 
-.cell > div > span:first-child {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.right[data-level='3'] .cell > div > div > span {
+.right[data-level='3'] .cell > div > div > span,
+.right[data-level='4'] .cell > div > div > span {
   line-height: 1;
 }
 
@@ -467,6 +481,20 @@
   gap: calc(8 * var(--u));
   min-width: 0;
   border-bottom: 1px solid var(--color-cream-200);
+}
+
+/* The total row only replaces the per-service list at fit level 4. */
+.waitingTotal {
+  display: none;
+  height: var(--row-h);
+}
+
+.right[data-level='4'] .waitingList {
+  display: none;
+}
+
+.right[data-level='4'] .waitingTotal {
+  display: flex;
 }
 
 .serviceName {

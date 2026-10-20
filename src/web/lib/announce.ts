@@ -16,7 +16,10 @@ const CHIME_TONES: Record<ChimeKind, { freq: number; ms: number }[]> = {
 const CHIME_PEAK_GAIN = 0.3;
 const ATTACK_S = 0.01;
 const PAUSE_AFTER_CHIME_MS = 300;
-const SPEECH_FALLBACK_MS = 8000;
+// Limit for an utterance that never starts, then a limit that grows with the text once it has.
+const SPEECH_START_STALL_MS = 5000;
+const SPEECH_BASE_MS = 3000;
+const SPEECH_PER_CHAR_MS = 120;
 const MAX_CALL_AGE_MS = 30_000;
 
 let context: AudioContext | null = null;
@@ -34,6 +37,8 @@ function getContext(): AudioContext | null {
 export async function unlockAudio(): Promise<boolean> {
   const ctx = getContext();
   if (!ctx) return false;
+  // Voices do not depend on the context, so a resume() that never settles cannot leave speech unloaded.
+  loadVoices();
   if (ctx.state !== 'running') {
     try {
       await ctx.resume();
@@ -46,16 +51,34 @@ export async function unlockAudio(): Promise<boolean> {
   return ctx.state === 'running';
 }
 
+/**
+ * Unlocks audio without a gesture when the browser allows it (kiosk Chrome started with
+ * --autoplay-policy=no-user-gesture-required). Resolves false in a normal browser, which needs a click.
+ */
+export async function unlockAudioIfAllowed(): Promise<boolean> {
+  const policy = (navigator as unknown as { getAutoplayPolicy?: (type: string) => string }).getAutoplayPolicy?.(
+    'audiocontext',
+  );
+  if (policy !== undefined && policy !== 'allowed') return false;
+  const ctx = getContext();
+  if (!ctx) return false;
+  if (ctx.state !== 'running') {
+    // A blocked resume() never settles, so do not wait for it past a short grace period.
+    await Promise.race([ctx.resume().catch(() => undefined), sleep(500)]);
+  }
+  if ((ctx.state as AudioContextState) !== 'running') return false;
+  loadVoices();
+  emitAudioChange();
+  return true;
+}
+
 /** Plays the chime. Resolves when it ends; resolves at once, silent, when audio is still locked. */
 export async function playChime(kind: ChimeKind = 'call'): Promise<void> {
   const ctx = getContext();
   if (!ctx) return;
   if (ctx.state !== 'running') {
-    try {
-      await ctx.resume();
-    } catch {
-      return;
-    }
+    // A blocked resume() never settles; waiting on it would hold the whole announcement queue.
+    await Promise.race([ctx.resume().catch(() => undefined), sleep(500)]);
     if ((ctx.state as AudioContextState) !== 'running') return;
   }
 
@@ -150,7 +173,20 @@ function speak(text: string): Promise<void> {
       if (activeUtterance === utterance) activeUtterance = null;
       resolve();
     };
-    const timeout = window.setTimeout(done, SPEECH_FALLBACK_MS);
+    // A stalled utterance would block later ones in Chrome's queue, so drop it before moving on.
+    // Cancelling is only for speech that never starts or runs far past its expected length.
+    const giveUp = () => {
+      window.speechSynthesis.cancel();
+      // A paused synth would stall every later utterance; resume() is a no-op when not paused.
+      window.speechSynthesis.resume();
+      done();
+    };
+    let timeout = window.setTimeout(giveUp, SPEECH_START_STALL_MS);
+    utterance.addEventListener('start', () => {
+      if (finished) return;
+      window.clearTimeout(timeout);
+      timeout = window.setTimeout(giveUp, SPEECH_BASE_MS + SPEECH_PER_CHAR_MS * text.length);
+    });
     utterance.addEventListener('end', done);
     utterance.addEventListener('error', done);
     window.speechSynthesis.speak(utterance);

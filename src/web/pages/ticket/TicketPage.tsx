@@ -102,7 +102,8 @@ function TicketView({ token }: { token: string }) {
   return (
     <>
       <div inert={overlayOpen}>
-        <VisitorFrame businessName={snapshot ? snapshot.businessName : null} footerNote={copy.ticket.savedOnDevice}>
+        <VisitorFrame businessName={snapshot ? snapshot.businessName : null} footerNote={state === 'waiting' || state === 'called' ? copy.ticket.savedOnDevice : undefined}
+        >
           <ConnectionStatus
             status={live.status}
             disconnectedSince={live.disconnectedSince}
@@ -253,7 +254,7 @@ function TicketBody({ snapshot, alerts, onEnable }: BodyProps) {
           </div>
         ) : (
           <h1 className={styles.position}>
-            <span className={styles.count}>{snapshot.position}</span>
+            <span className={styles.count}>{snapshot.position}</span>{' '}
             <span className={styles.ahead}>{copy.ticket.aheadLabel}</span>
           </h1>
         )}

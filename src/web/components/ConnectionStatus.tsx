@@ -77,7 +77,7 @@ export function ConnectionStatus({
             {status === 'offline'
               ? copy.connection.offline
               : disconnectedSince !== null
-                ? copy.connection.reconnectingSince(formatTime(disconnectedSince, timeZone))
+                ? copy.connection.reconnectingBodySince(formatTime(disconnectedSince, timeZone))
                 : copy.connection.reconnectingBody}
           </p>
         </div>

@@ -66,13 +66,35 @@
   line-height: var(--leading-xs);
 }
 
-/* A long name is cut with an ellipsis in every layout; the full text stays in the DOM. */
+/* The name wraps; nothing is cut on phone and staff plates. */
 .tabText {
   display: block;
   min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/*
+ * TV names wrap to two lines. A word wider than the tab first steps the name to 40 design px
+ * (data-fit), and only then is a word broken and the second line ended with an ellipsis.
+ */
+.tvLg .tabText,
+.tvMd .tabText,
+.tvSm .tabText {
+  display: -webkit-box;
+  /* line-height 1 puts the clip edge above the descenders of g, j, p, q, y; clip with a margin instead. */
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: clip;
+  overflow-clip-margin: 0.16em;
+  overflow-wrap: normal;
+  line-height: 1;
+  text-wrap: balance;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.tabText[data-fit='small'] {
+  font-size: var(--tv-label);
+  overflow-wrap: anywhere;
 }
 
 .box {
@@ -92,13 +114,19 @@
   font-weight: 800;
   line-height: var(--leading-num);
   font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
+/* An empty plate keeps the height of a numbered one, so a counter that starts or stops serving never changes the fit. */
 .muted {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--number-size) * var(--leading-num));
   font-size: var(--tv-label);
   font-weight: 600;
   line-height: var(--leading-lg);
+  white-space: normal;
+  overflow-wrap: break-word;
   color: var(--color-ink-600);
 }
 
@@ -120,9 +148,9 @@
   display: flex;
   align-items: center;
   flex: none;
-  width: calc(288 * var(--tv-px));
-  max-width: 40%;
-  min-width: 0;
+  width: fit-content;
+  min-width: calc(288 * var(--tv-px));
+  max-width: calc(320 * var(--tv-px));
 }
 
 .side .box {
@@ -130,6 +158,26 @@
   align-items: center;
   flex: 1;
   border-left: 0;
+}
+
+/* The horizontal main plate keeps at least 352 design px for the number. */
+.tvLg.side .box {
+  min-width: calc(352 * var(--tv-px));
+}
+
+/* Stacked TV plates fill their grid row, so every plate in a row has the same height. */
+.tvMd,
+.tvSm:not(.side) {
+  height: 100%;
+}
+
+/* In a stretched plate the number sits at the bottom, so the numbers of one row share a baseline. */
+.tvMd .box,
+.tvSm:not(.side) .box {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .inverted .box {

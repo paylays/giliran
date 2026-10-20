@@ -26,9 +26,9 @@
   --text-lg: 1.25rem;
   --text-xl: 1.75rem;
   --text-2xl: 2.5rem;
-  --num-md: 3.5rem;
-  --num-lg: clamp(4rem, 22vw, 5.5rem);
-  --num-xl: clamp(5rem, 9vw, 8rem);
+  --num-md: clamp(2.5rem, 22vw, 3.5rem);
+  --num-lg: clamp(2.5rem, 22vw, 5.5rem);
+  --num-xl: clamp(2.5rem, min(max(5rem, 9vw), 22vw), 8rem);
   --leading-xs: 1.4;
   --leading-sm: 1.45;
   --leading-md: 1.5;

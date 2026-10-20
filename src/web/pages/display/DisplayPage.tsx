@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ConnectionStatus } from '../../components/ConnectionStatus.tsx';
 import { copy } from '../../content/copy.ts';
-import { createCallTracker, enqueueCallAnnouncement, playChime, unlockAudio, useAudioStatus } from '../../lib/announce.ts';
+import { createCallTracker, enqueueCallAnnouncement, playChime, unlockAudio, unlockAudioIfAllowed, useAudioStatus } from '../../lib/announce.ts';
 import { useLiveSnapshot } from '../../lib/live.ts';
 import type { DisplaySnapshot } from '../../../shared/contracts.ts';
 import { CallField } from './CallField.tsx';
@@ -12,10 +12,10 @@ import { RecentCalls } from './RecentCalls.tsx';
 import { StartOverlay } from './StartOverlay.tsx';
 import { Waiting } from './Waiting.tsx';
 import { useCallFlash } from './useCallFlash.ts';
-import { fitLevels, useFit } from './useFit.ts';
+import { fitLevels, fitNames, useFit } from './useFit.ts';
 import styles from './DisplayPage.module.css';
 
-const FIT_LEVELS = 4;
+const FIT_LEVELS = 5;
 
 export function DisplayPage() {
   const { snapshot, status, serverOffset, disconnectedSince, recoveredAt } = useLiveSnapshot<DisplaySnapshot>(
@@ -54,8 +54,23 @@ export function DisplayPage() {
     void unlocked.then((ok) => (ok ? playChime('call') : undefined));
   }, []);
 
+  // Kiosk browsers that allow autoplay skip the Start overlay, so an unattended TV recovers after a reboot.
+  useEffect(() => {
+    void unlockAudioIfAllowed().then((ok) => {
+      if (!ok || startedRef.current) return;
+      startedRef.current = true;
+      setStarted(true);
+    });
+  }, []);
+
   const counterCount = snapshot?.counters.length ?? 0;
-  useFit(() => fitLevels(rightColumn, FIT_LEVELS), [snapshot?.counters, snapshot?.services]);
+  // One top-down pass: back to level 0, measure the names there, then step the level up until it fits.
+  // Fitting the names from the child would measure them at the previous level and flip the layout.
+  useFit(() => {
+    if (rightColumn.current) rightColumn.current.dataset.level = '0';
+    fitNames(rightColumn.current);
+    fitLevels(rightColumn, FIT_LEVELS);
+  }, [snapshot?.counters, snapshot?.services]);
 
   const soundText =
     audio === 'on' ? copy.display.soundOn : audio === 'locked' ? copy.display.soundLocked : copy.display.soundChimeOnly;
@@ -76,7 +91,7 @@ export function DisplayPage() {
             <div className={styles.left}>
               <CallField call={latest} inverted={flash.inverted} />
               <div className={styles.bottom}>
-                <RecentCalls calls={snapshot.recentCalls.slice(1, 4)} />
+                <RecentCalls calls={snapshot.recentCalls.slice(1, 4)} layoutKey={snapshot.wifiSsid === null ? 'wide' : 'narrow'} />
                 <QrArea wifiSsid={snapshot.wifiSsid} wifiQrVersion={snapshot.wifiQrVersion} />
               </div>
             </div>

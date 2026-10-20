@@ -26,7 +26,7 @@ export function useStaffPanel() {
   const [notice, setNotice] = useState<PanelNotice>(null);
   const busyRef = useRef(false);
 
-  const toLogin = useCallback(() => navigate('/login', { replace: true }), [navigate]);
+  const toLogin = useCallback((query = '') => navigate(`/login${query}`, { replace: true }), [navigate]);
 
   const refresh = useCallback(
     () =>
@@ -70,7 +70,7 @@ export function useStaffPanel() {
         return next;
       } catch (error) {
         if (error instanceof ApiError && error.status === 401) {
-          toLogin();
+          toLogin('?expired=1');
           return null;
         }
         if (error instanceof ApiError && error.status === 409) {
@@ -110,7 +110,7 @@ export function useStaffPanel() {
         return;
       }
     }
-    toLogin();
+    toLogin('?loggedOut=1');
   };
 
   return { snapshot, live, loadError, busy, notice, refresh, pickCounter, callNext, ticketAction, logout };

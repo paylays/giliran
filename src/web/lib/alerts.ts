@@ -11,8 +11,16 @@ export function canVibrate(): boolean {
   return typeof navigator.vibrate === 'function';
 }
 
+// Chrome blocks vibrate() and refuses to start audio until the visitor has interacted with the page.
+// Browsers without userActivation report undefined and are allowed to try.
+let audioUnlocked = false;
+
 function vibrate(pattern: number[]): boolean {
-  return canVibrate() && navigator.vibrate(pattern);
+  return canVibrate() && navigator.userActivation?.hasBeenActive !== false && navigator.vibrate(pattern);
+}
+
+function chime(kind: 'call' | 'near'): void {
+  if (audioUnlocked) void playChime(kind);
 }
 
 export interface EnableResult {
@@ -23,7 +31,10 @@ export interface EnableResult {
 /** Call from the "enable alerts" button. Unlocks audio, plays the call chime once and vibrates once. */
 export async function enableAlerts(): Promise<EnableResult> {
   const sound = await unlockAudio();
-  if (sound) await playChime('call');
+  if (sound) {
+    audioUnlocked = true;
+    await playChime('call');
+  }
   const vibration = vibrate([200]);
   return { sound, vibration };
 }
@@ -35,14 +46,14 @@ export function alertNear(key: string): boolean {
   if (nearAlerted.has(key)) return false;
   nearAlerted.add(key);
   vibrate(NEAR_VIBRATION);
-  void playChime('near');
+  chime('near');
   return true;
 }
 
 /** Two-tone chime and long vibration, then a flashing tab title while the tab is hidden. */
 export function alertCalled(ticketNumber: string, counterName: string): void {
   vibrate(CALLED_VIBRATION);
-  void playChime('call');
+  chime('call');
   startTitleFlash(copy.ticket.tabCalled(ticketNumber), copy.ticket.tabGoTo(counterName));
 }
 

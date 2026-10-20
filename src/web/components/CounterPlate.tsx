@@ -50,7 +50,9 @@ export function CounterPlate({
       )}
     >
       <span className={styles.tab}>
-        <span className={styles.tabText}>{label}</span>
+        <span className={styles.tabText} data-tab-text="">
+          {label}
+        </span>
       </span>
       <div className={styles.box}>
         <span className={cx(styles.number, muted && styles.muted)}>{children}</span>

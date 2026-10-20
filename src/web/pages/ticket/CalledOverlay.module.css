@@ -61,7 +61,7 @@
   font-weight: 800;
   line-height: var(--leading-num);
   font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .goTo {

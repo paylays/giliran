@@ -14,8 +14,8 @@ The page is `http://<server-ip>:3000/display`. Admins also get a **Buka layar TV
 
 - The latest call (**Nomor dipanggil**) with the counter to go to.
 - Each counter (**Loket**) and its current number.
-- **Panggilan sebelumnya**, the recent calls.
-- **Menunggu**, how many people wait per service.
+- **Sebelumnya**, the recent calls.
+- **Menunggu**, how many people wait per service. When the screen is full, this collapses into one **Semua layanan** total.
 - The QR code. With the venue Wi-Fi QR configured it shows two codes: **1. Sambungkan ke Wi-Fi** and **2. Ambil nomor**. Otherwise one code, **Pindai untuk ambil nomor**.
 - A status line with the connection and sound state.
 
@@ -23,7 +23,7 @@ The TV needs no sign-in.
 
 ## Sound
 
-Browsers block audio until a person interacts with the page. When the display opens, a start overlay appears (**Nyalakan layar antrean**). Click **Mulai dan nyalakan suara** once. The status line then shows **Suara aktif**. You need this click again after every page load or browser restart.
+Browsers block audio until a person interacts with the page. When the display opens, a start overlay appears (**Siapkan layar TV**). Click **Mulai dan nyalakan suara** once. The status line then shows **Suara aktif**. You need this click again after every page load or browser restart.
 
 To skip the click on a TV with no operator, start Chrome in kiosk mode with autoplay allowed:
 
@@ -31,7 +31,9 @@ To skip the click on a TV with no operator, start Chrome in kiosk mode with auto
 chrome --kiosk --autoplay-policy=no-user-gesture-required http://<ip>:3000/display
 ```
 
-Replace `<ip>` with the server address. Close all other Chrome windows before running it, or the flags may be ignored. Add this command to the device's startup so the display returns after a reboot.
+Replace `<ip>` with the server address. Close all other Chrome windows before running it, or the flags may be ignored. Add this command to the device's startup so the display returns after a reboot. With this flag the overlay is skipped and sound starts on its own.
+
+If the display page hits an unexpected error, it reloads itself after 30 seconds, waiting longer after each repeated failure (up to 5 minutes). Without the kiosk flag, a reload brings back the start overlay and the TV stays silent until someone clicks it, so an unattended TV needs the flag.
 
 ## Voice
 
