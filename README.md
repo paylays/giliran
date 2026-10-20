@@ -167,19 +167,69 @@ Playwright runs `tests/e2e` in Chromium. Each test starts a fresh server on port
 ## Project structure
 
 ```text
-src/server/      Hono API, SQLite access, domain logic, SSE hub, daily rollover
-  db/migrations/ NNN_name.sql migrations and NNN_name.down.sql manual rollbacks
-  routes/        public, auth, staff, admin and stream endpoints
-src/shared/      Request schemas and types shared by server and web (contracts.ts)
-src/web/         React app: pages for take, ticket, display, login, staff, admin
-scripts/         create-admin.ts
-tests/           unit, integration and e2e (Playwright) tests
-docs/            Guides (see Documentation)
+giliran/
+├── src/
+│   ├── server/              Hono API, served as one Node process
+│   │   ├── auth/            Sessions, password hashing, rate limits
+│   │   ├── db/              SQLite access and migrations (NNN_name.sql, NNN_name.down.sql manual rollbacks)
+│   │   ├── domain/          Tickets, services, counters, settings, users, Wi-Fi
+│   │   ├── realtime/        SSE hub, snapshots, daily rollover
+│   │   └── routes/          public, auth, staff, admin and stream endpoints
+│   ├── shared/              Request schemas and types shared by server and web (contracts.ts)
+│   └── web/                 React app
+│       ├── components/      Shared UI components
+│       └── pages/           take, ticket, display, login, staff, admin
+├── scripts/                 create-admin.ts
+├── tests/
+│   ├── unit/                Vitest unit tests
+│   ├── integration/         Vitest API tests on an in-memory database
+│   └── e2e/                 Playwright browser tests
+└── docs/                    Guides (see Documentation)
 ```
 
 ## Tech stack
 
-Node 24, Hono, Server-Sent Events, SQLite (`node:sqlite`), Zod, QR codes with `qrcode`, React 19, Vite, wouter, TypeScript, Vitest, Playwright.
+<table>
+  <tr>
+    <th align="left">Layer</th>
+    <th align="left">Tools</th>
+  </tr>
+  <tr>
+    <td>Server</td>
+    <td>
+      <a href="https://nodejs.org"><img alt="Node.js 24" src="https://img.shields.io/badge/Node.js-24-339933?style=for-the-badge&logo=nodedotjs&logoColor=white"></a>
+      <a href="https://hono.dev"><img alt="Hono" src="https://img.shields.io/badge/Hono-E36002?style=for-the-badge&logo=hono&logoColor=white"></a>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events"><img alt="Server-Sent Events" src="https://img.shields.io/badge/Server--Sent_Events-0B7285?style=for-the-badge"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>Data</td>
+    <td>
+      <a href="https://sqlite.org"><img alt="SQLite via node:sqlite" src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white"></a>
+      <a href="https://zod.dev"><img alt="Zod" src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white"></a>
+      <a href="https://www.npmjs.com/package/qrcode"><img alt="qrcode" src="https://img.shields.io/badge/qrcode-444444?style=for-the-badge"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>Web</td>
+    <td>
+      <a href="https://react.dev"><img alt="React 19" src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black"></a>
+      <a href="https://vite.dev"><img alt="Vite" src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white"></a>
+      <a href="https://github.com/molefrog/wouter"><img alt="wouter" src="https://img.shields.io/badge/wouter-7B4B94?style=for-the-badge"></a>
+      <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>Testing and linting</td>
+    <td>
+      <a href="https://vitest.dev"><img alt="Vitest" src="https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white"></a>
+      <a href="https://playwright.dev"><img alt="Playwright" src="https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge"></a>
+      <a href="https://eslint.org"><img alt="ESLint" src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white"></a>
+    </td>
+  </tr>
+</table>
+
+SQLite comes from Node's built-in `node:sqlite` module.
 
 ## Limitations
 
