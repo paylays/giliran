@@ -1,36 +1,82 @@
-# Giliran
+<h1 align="center">Giliran</h1>
 
-Giliran is a real-time queue system for one venue on a local network. Visitors scan a QR code and take a number on their phone. A TV in the waiting room shows the queue and announces each call by voice. Staff call numbers from a counter panel. An admin sets up services, counters, accounts and the QR poster.
+<p align="center">
+  A real-time queue system for one venue on a local network.<br>
+  Visitors scan a QR code, a TV calls the numbers out loud, staff run the counters.
+</p>
 
-It runs as one Node process with one SQLite file. There is no cloud service, no sign-up for visitors, and no personal data collected: visitors never enter a name or phone number. The interface is in Indonesian.
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green"></a>
+  <img alt="Node.js 24 or newer" src="https://img.shields.io/badge/node-%3E%3D24-339933?logo=nodedotjs&logoColor=white">
+</p>
+
+![The TV display: the latest call, counters, recent calls, waiting counts per service, and two QR codes, one to join the Wi-Fi and one to take a number.](docs/images/display.png)
+
+Giliran runs as one Node process with one SQLite file. There is no cloud service, no sign-up for visitors, and no personal data collected: visitors never enter a name or phone number. The interface is in Indonesian.
+
+## Contents
+
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [How it works](#how-it-works)
+- [Requirements](#requirements)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Scripts](#scripts)
+- [URLs](#urls)
+- [Tests](#tests)
+- [Project structure](#project-structure)
+- [Tech stack](#tech-stack)
+- [Limitations](#limitations)
+- [Documentation](#documentation)
+- [License](#license)
 
 ## Features
 
-- **Visitor ticket.** Scan the poster QR, pick a service, get a number on the phone. The ticket page updates live and shows how many people are ahead.
-- **Alerts on the phone.** A chime, vibration (Android) and an on-screen message when the turn is near and when the number is called. See [Limitations](#limitations).
-- **TV display.** Latest call, counters, recent calls, queue length per service, and the QR code. Calls are spoken in Indonesian.
-- **Staff panel.** Pick a counter, then call the next number, recall, skip or finish.
-- **Admin settings.** Business name, timezone, services (each with a 1 to 3 letter number prefix), counters, staff accounts, and a printable A4 QR poster.
-- **Venue Wi-Fi QR.** Optionally enter the guest Wi-Fi once. The poster and the TV then show two QR codes: join the Wi-Fi, then take a number.
-- **Daily reset.** Numbers restart at midnight in the business timezone.
+- Visitors scan the poster QR, pick a service and get a number on their phone. The ticket page updates live and shows how many people are ahead.
+- The phone plays a chime, vibrates (Android) and shows a message when the turn is near and when the number is called. See [Limitations](#limitations).
+- The TV in the waiting room shows the latest call, the counters, recent calls, the queue length per service and the QR code. Calls are spoken in Indonesian.
+- Staff pick a counter, then call the next number, recall, skip or finish.
+- The admin sets the business name, the timezone, services (each with a 1 to 3 letter number prefix), counters and staff accounts, and prints an A4 QR poster.
+- The admin can enter the guest Wi-Fi once. The poster and the TV then show two QR codes: join the Wi-Fi, then take a number.
+- Numbers restart at midnight in the business timezone.
+
+## Screenshots
+
+The screenshots use demo data (a clinic with three services and three counters).
+
+<table>
+  <tr>
+    <td align="center" width="50%"><img alt="Phone screen listing the services a visitor can pick to take a number." src="docs/images/take.png" width="260"><br><sub>Visitor picks a service (<code>/take</code>)</sub></td>
+    <td align="center" width="50%"><img alt="Phone screen with a live ticket showing the visitor's number and how many people are ahead." src="docs/images/ticket.png" width="260"><br><sub>Live ticket (<code>/ticket/:token</code>)</sub></td>
+  </tr>
+</table>
+
+![The staff counter panel: the current number at a counter with buttons to call the next number, recall, skip and finish.](docs/images/staff.png)
+
+![The admin page for setting up services and counters.](docs/images/admin.png)
 
 ## How it works
 
-```
-  phone  --scan QR-->  /take  -->  /ticket/:token   (live updates over SSE)
-                         |
-  staff  --/staff-->     |  Hono API + SQLite  -->  /display  (TV, live updates and voice)
-                         |
-  admin  --/admin-->     +  one Node process on your LAN
+```mermaid
+flowchart LR
+  Phone["Phone<br>/take, /ticket/:token"] <--> Server
+  TV["TV<br>/display"] <--> Server
+  Staff["Staff<br>/staff"] <--> Server
+  Admin["Admin<br>/admin"] <--> Server
+  Server["Hono API + SQLite<br>one Node process on your LAN"]
 ```
 
 The server pushes changes to phones, the TV and staff panels with Server-Sent Events (SSE). Everything runs on the local network, so the TV, the phones and the staff devices must all reach the server's address.
 
 ## Requirements
 
-- Node.js 24 or newer. Giliran uses the built-in `node:sqlite` module (still marked experimental in Node 24) and runs TypeScript directly through Node's type stripping. The `dev`, `start` and `admin:create` scripts hide the experimental warning.
+- Node.js 24 or newer. Giliran runs TypeScript directly through Node's type stripping. The `dev`, `start` and `admin:create` scripts hide the experimental warning described below.
 - npm.
 - For the TV: a device with a current Chrome or Edge. See [docs/display-setup.md](docs/display-setup.md).
+
+> [!NOTE]
+> Giliran uses the built-in `node:sqlite` module, which is still marked experimental in Node 24.
 
 ## Quick start
 
@@ -57,7 +103,8 @@ npm start                # listens on 0.0.0.0:3000 by default
 
 Then follow [docs/setup-lan.md](docs/setup-lan.md).
 
-The first admin can only be created with `npm run admin:create`. There is no web sign-up. After that, the admin adds staff accounts in the admin page.
+> [!IMPORTANT]
+> The first admin can only be created with `npm run admin:create`. There is no web sign-up. After that, the admin adds staff accounts in the admin page.
 
 ## Configuration
 
@@ -110,11 +157,16 @@ npm run test:e2e
 
 Vitest runs `tests/unit` and `tests/integration`. Integration tests exercise the API against an in-memory database.
 
+<details>
+<summary>End-to-end tests (Playwright)</summary>
+
 Playwright runs `tests/e2e` in Chromium. Each test starts a fresh server on port 3100 with its own database (`data/e2e.db`). The tests cover a visitor, a counter and the TV staying in sync, the recall, skip and done flow, recovery after a server restart, and admin setup. If Chromium is missing, run `npx playwright install chromium`.
+
+</details>
 
 ## Project structure
 
-```
+```text
 src/server/      Hono API, SQLite access, domain logic, SSE hub, daily rollover
   db/migrations/ NNN_name.sql migrations and NNN_name.down.sql manual rollbacks
   routes/        public, auth, staff, admin and stream endpoints
@@ -122,7 +174,7 @@ src/shared/      Request schemas and types shared by server and web (contracts.t
 src/web/         React app: pages for take, ticket, display, login, staff, admin
 scripts/         create-admin.ts
 tests/           unit, integration and e2e (Playwright) tests
-docs/            Guides (below)
+docs/            Guides (see Documentation)
 ```
 
 ## Tech stack
@@ -131,12 +183,14 @@ Node 24, Hono, Server-Sent Events, SQLite (`node:sqlite`), Zod, QR codes with `q
 
 ## Limitations
 
-- **One venue, one server.** There is no multi-site support and no clustering. The database is a local file.
-- **Plain HTTP on a LAN.** Without HTTPS, phones cannot receive push notifications. The chime, vibration and message work only while the ticket page is open and the screen is on. The TV voice is the reliable channel.
-- **TV browser.** The TV needs a device running current Chrome or Edge. Built-in smart-TV browsers are not supported.
-- **Voice.** The TV announces calls with the browser's Indonesian (`id-ID`) voice. Without that voice installed, only a chime plays.
-- **Fixed address.** The QR code holds the server's address. If the server's IP changes, every printed poster stops working.
-- **Interface language.** The interface is Indonesian only.
+> [!WARNING]
+> Giliran runs on plain HTTP on a LAN. Without HTTPS, phones cannot receive push notifications. The chime, vibration and message work only while the ticket page is open and the screen is on. The TV voice is the reliable channel.
+
+- Giliran serves one venue from one server. There is no multi-site support and no clustering, and the database is a local file.
+- The TV needs a device running current Chrome or Edge. Built-in smart-TV browsers are not supported.
+- The TV announces calls with the browser's Indonesian (`id-ID`) voice. Without that voice installed, only a chime plays.
+- The QR code holds the server's address. If the server's IP changes, every printed poster stops working.
+- The interface is Indonesian only.
 
 ## Documentation
 
