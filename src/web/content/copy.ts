@@ -271,7 +271,9 @@ export const copy = {
     latestNone: 'Belum ada panggilan hari ini.',
 
     countersHeading: 'Loket',
-    counterNoTicket: 'Tidak ada nomor',
+    // Empty plate. Must stay on one line in the narrowest plate box (189 design px with 9 to 12 counters):
+    // "Tidak ada" is 184 at 40/600. The old "Tidak ada nomor" (318) wrapped and made empty plates taller.
+    counterNoTicket: 'Tidak ada',
     countersNone: 'Belum ada loket aktif.',
 
     // Must fit the 408 design px recent-calls column at 40/600 next to two QR codes: "Sebelumnya" is 240,
@@ -283,6 +285,9 @@ export const copy = {
     waitingHeading: 'Menunggu',
     waitingUnit: 'orang',
     waitingLabel: (service: string, count: number): string => `${service}: ${count} orang menunggu`,
+    // The single total row that replaces the per-service rows when the screen is too crowded (fit level 4),
+    // so counter names are never cut to make room. Screen readers get waitingLabel(waitingAll, total).
+    waitingAll: 'Semua layanan',
     servicesNone: 'Belum ada layanan aktif.',
 
     qrCaption: 'Pindai untuk ambil nomor',
@@ -544,6 +549,12 @@ export const copy = {
       // Shown above the table when more than 12 counters are active: the TV layout is built for at most 12.
       tvLimitNote:
         'Layar TV hanya muat 12 loket aktif. Mulai loket ke-13, sebagian tulisan di layar TV terpotong. Nonaktifkan loket yang tidak dipakai.',
+      // Shown above the table when an active counter's name cannot be shown whole on the TV plate at the current
+      // number of active counters (two lines at 40 design px, no word wider than the plate). Fewer active
+      // counters give wider plates, so deactivating unused counters is a real fix as well as renaming.
+      tvNamesCutTitle: 'Nama loket terpotong di layar TV',
+      tvNamesCutBody: (activeCount: number, names: string[]): string =>
+        `Dengan ${activeCount} loket aktif, nama ini tidak muat utuh di layar TV: ${new Intl.ListFormat('id-ID', { type: 'conjunction' }).format(names)}. Pakai nama yang lebih pendek, misalnya Loket 3 atau Ruang Gigi, atau nonaktifkan loket yang tidak dipakai.`,
       preview: 'Dengarkan contoh panggilan',
       previewUnavailable: 'Suara bahasa Indonesia tidak tersedia di peramban ini, jadi contoh tidak bisa diputar.',
       submit: 'Simpan loket',
