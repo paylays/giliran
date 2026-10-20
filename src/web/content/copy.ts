@@ -96,12 +96,8 @@ export const copy = {
 
   common: {
     cancel: 'Batal',
-    close: 'Tutup',
-    save: 'Simpan',
     saving: 'Menyimpan...',
-    saved: 'Perubahan tersimpan.',
     edit: 'Ubah',
-    back: 'Kembali',
     retry: 'Coba lagi',
     reload: 'Muat ulang halaman',
     logout: 'Keluar',
@@ -121,7 +117,6 @@ export const copy = {
     required: (label: string): string => `${label} wajib diisi.`,
     minLength: (min: number): string => `Minimal ${min} karakter.`,
     maxLength: (max: number): string => `Paling banyak ${max} karakter.`,
-    at: (time: string): string => `pukul ${time}`,
     youSuffix: '(Anda)',
     fieldErrorsSummary: 'Ada isian yang perlu diperbaiki. Periksa kolom yang ditandai.',
   },
@@ -141,6 +136,10 @@ export const copy = {
     reconnectingTitle: 'Sambungan terputus',
     reconnectingBody: 'Menyambung ulang otomatis. Data yang tampil mungkin belum terbaru.',
     reconnectingSince: (time: string): string => `Sambungan terputus sejak pukul ${time}. Menyambung ulang otomatis.`,
+    // Body of the reconnecting banner on phone and staff screens, under reconnectingTitle. The TV status line
+    // has no title, so it keeps reconnectingSince.
+    reconnectingBodySince: (time: string): string =>
+      `Terputus sejak pukul ${time}. Menyambung ulang otomatis. Data yang tampil mungkin belum terbaru.`,
     reconnected: 'Tersambung kembali. Data sudah diperbarui.',
     offline: 'Perangkat ini tidak tersambung ke jaringan. Periksa Wi-Fi Anda.',
   },
@@ -165,11 +164,10 @@ export const copy = {
     lead: 'Pilih layanan yang Anda tuju. Nomor Anda tampil di ponsel ini dan dipanggil lewat layar TV.',
     servicesHeading: 'Layanan',
     loading: 'Memuat daftar layanan...',
-    loadError: 'Daftar layanan gagal dimuat.',
+    loadError: 'Daftar layanan gagal dimuat',
     empty: 'Belum ada layanan yang dibuka. Tanyakan kepada petugas di lokasi.',
     // Today's waiting tickets in that service, from GET /api/services.
     waitingCount: (count: number): string => (count === 0 ? 'Tidak ada yang menunggu' : `${count} orang menunggu`),
-    prefixLabel: (prefix: string): string => `Nomor berawalan ${prefix}`,
     takeLabel: (service: string): string => `Ambil nomor untuk ${service}`,
     taking: 'Mengambil nomor...',
     takeFailed: 'Nomor gagal diambil. Coba lagi.',
@@ -189,20 +187,19 @@ export const copy = {
     // Expired tickets come from an earlier day, so a time alone would read as today.
     takenOnDate: (date: string, time: string): string => `Diambil pada ${date} pukul ${time}`,
     loading: 'Memuat nomor Anda...',
-    loadError: 'Nomor Anda belum bisa dimuat. Pastikan ponsel tersambung ke Wi-Fi tempat ini.',
+    // Title of the error state; the body is states.networkError, which already says what to check.
+    loadError: 'Nomor Anda belum bisa dimuat',
 
     // Waiting
     aheadLabel: 'orang di depan Anda',
     frontTitle: 'Anda di urutan terdepan',
     frontBody: 'Bersiaplah. Nomor Anda bisa dipanggil kapan saja.',
-    positionSentence: (count: number): string =>
-      count === 0 ? 'Anda di urutan terdepan.' : `${count} orang di depan Anda.`,
 
-    // Near banner
+    // Near banner. At count 0 the front block right under it already says "Anda di urutan terdepan".
     nearTitle: 'Giliran Anda sudah dekat',
     nearBody: (count: number): string =>
       count === 0
-        ? 'Tidak ada lagi yang di depan Anda. Mendekatlah ke area loket dan pantau layar TV.'
+        ? 'Mendekatlah ke area loket dan pantau layar TV.'
         : `Tinggal ${count} orang di depan Anda. Mendekatlah ke area loket dan pantau layar TV.`,
 
     // Called: full-screen message
@@ -257,10 +254,11 @@ export const copy = {
   },
 
   display: {
-    docTitle: 'Layar antrean',
+    // "Layar TV" is the name every other screen, the poster, and the admin use for this page.
+    docTitle: 'Layar TV',
 
     // Full-screen start overlay that unlocks sound
-    startTitle: 'Nyalakan layar antrean',
+    startTitle: 'Siapkan layar TV',
     startBody: 'Tekan tombol di bawah satu kali agar layar ini boleh memutar bunyi dan suara panggilan.',
     startButton: 'Mulai dan nyalakan suara',
     startKioskHint:
@@ -276,8 +274,10 @@ export const copy = {
     counterNoTicket: 'Tidak ada nomor',
     countersNone: 'Belum ada loket aktif.',
 
-    recentHeading: 'Panggilan sebelumnya',
-    recentNone: 'Belum ada panggilan sebelumnya.',
+    // Must fit the 408 design px recent-calls column at 40/600 next to two QR codes: "Sebelumnya" is 240,
+    // "Belum ada." is 216. The old "Panggilan sebelumnya" measured 431 and ran into the QR quiet zone.
+    recentHeading: 'Sebelumnya',
+    recentNone: 'Belum ada.',
     recentItemLabel: (ticketNumber: string, counterName: string): string => `${ticketNumber} di ${counterName}`,
 
     waitingHeading: 'Menunggu',
@@ -323,7 +323,6 @@ export const copy = {
     usernameRequired: 'Isi nama pengguna.',
     passwordRequired: 'Isi kata sandi.',
     invalid: 'Nama pengguna atau kata sandi salah.',
-    rateLimited: 'Terlalu banyak percobaan masuk yang gagal. Tunggu satu menit, lalu coba lagi.',
     // 429 too_many_attempts. `seconds` is the Retry-After value. The server counts failures per username and
     // client address, so other usernames can still sign in from this device.
     rateLimitedWait: (seconds: number): string => {
@@ -346,7 +345,7 @@ export const copy = {
     changeCounter: 'Ganti loket',
     adminLink: 'Pengaturan admin',
     loading: 'Memuat data loket...',
-    loadError: 'Panel loket gagal dimuat.',
+    loadError: 'Panel loket gagal dimuat',
 
     // Pick a counter
     pickTitle: 'Pilih loket',
@@ -372,7 +371,8 @@ export const copy = {
     waitingForCounter: (count: number): string =>
       count === 0 ? 'Tidak ada yang menunggu untuk loket ini' : `${count} nomor menunggu untuk loket ini`,
     waitingByServiceHeading: 'Menunggu per layanan',
-    waitingByService: (count: number): string => `${count} menunggu`,
+    // Under the heading waitingByServiceHeading, so the row names the unit instead of repeating "menunggu".
+    waitingByService: (count: number): string => `${count} nomor`,
 
     // Actions
     callNext: 'Panggil berikutnya',
@@ -417,8 +417,6 @@ export const copy = {
     },
     staffPanelLink: 'Panel loket',
     displayLink: 'Buka layar TV',
-    forbidden: 'Halaman ini khusus admin.',
-    forbiddenAction: 'Ke panel loket',
     saveFailed: 'Perubahan gagal disimpan. Periksa isian yang ditandai, lalu coba lagi.',
     // Banner title for a failed row action (activate, deactivate, reorder). No form is open, so nothing is marked.
     actionFailedTitle: 'Perubahan tidak disimpan',
@@ -426,7 +424,7 @@ export const copy = {
     settings: {
       title: 'Pengaturan umum',
       loading: 'Memuat pengaturan...',
-      loadError: 'Pengaturan gagal dimuat.',
+      loadError: 'Pengaturan gagal dimuat',
       businessName: 'Nama tempat',
       businessNameHint: 'Tampil di halaman ambil nomor, layar TV, dan poster QR.',
       timezone: 'Zona waktu',
@@ -498,7 +496,7 @@ export const copy = {
       title: 'Layanan',
       lead: 'Setiap layanan punya antrean dan awalan nomor sendiri.',
       loading: 'Memuat layanan...',
-      loadError: 'Daftar layanan gagal dimuat.',
+      loadError: 'Daftar layanan gagal dimuat',
       empty: 'Belum ada layanan. Tambahkan layanan pertama agar pengunjung bisa mengambil nomor.',
       add: 'Tambah layanan',
       addTitle: 'Tambah layanan',
@@ -526,7 +524,7 @@ export const copy = {
       title: 'Loket',
       lead: 'Atur loket dan layanan yang dilayani setiap loket. Nama loket diucapkan saat pemanggilan.',
       loading: 'Memuat loket...',
-      loadError: 'Daftar loket gagal dimuat.',
+      loadError: 'Daftar loket gagal dimuat',
       empty: 'Belum ada loket. Tambahkan loket agar petugas bisa mulai memanggil nomor.',
       add: 'Tambah loket',
       addTitle: 'Tambah loket',
@@ -543,6 +541,9 @@ export const copy = {
       servicesNoneWarning: 'Loket tanpa layanan tidak bisa memanggil nomor.',
       servicesNoneInRow: 'Belum ada layanan',
       servicesEmpty: 'Belum ada layanan aktif. Buat layanan dulu di bagian Layanan.',
+      // Shown above the table when more than 12 counters are active: the TV layout is built for at most 12.
+      tvLimitNote:
+        'Layar TV hanya muat 12 loket aktif. Mulai loket ke-13, sebagian tulisan di layar TV terpotong. Nonaktifkan loket yang tidak dipakai.',
       preview: 'Dengarkan contoh panggilan',
       previewUnavailable: 'Suara bahasa Indonesia tidak tersedia di peramban ini, jadi contoh tidak bisa diputar.',
       submit: 'Simpan loket',
@@ -562,7 +563,7 @@ export const copy = {
       title: 'Petugas',
       lead: 'Akun untuk petugas loket dan admin.',
       loading: 'Memuat akun petugas...',
-      loadError: 'Daftar petugas gagal dimuat.',
+      loadError: 'Daftar petugas gagal dimuat',
       empty: 'Belum ada akun petugas selain akun Anda.',
       add: 'Tambah petugas',
       addTitle: 'Tambah petugas',
@@ -598,7 +599,8 @@ export const copy = {
     },
 
     poster: {
-      title: 'Poster kode QR',
+      // Same name as the nav item and the business-name hint.
+      title: 'Poster QR',
       lead: 'Cetak poster ini dan tempel di pintu masuk atau ruang tunggu, di tempat yang mudah dijangkau kamera ponsel.',
       targetLabel: 'Alamat di dalam kode QR ambil nomor',
       ipWarning:
@@ -650,12 +652,9 @@ export const copy = {
     urlLabelTwoStep: 'Kode 2 tidak bisa dipindai? Ketik alamat ini di ponsel:',
   },
 
+  // The spoken lines come from the exported functions above (announceCall, announceRecall).
   speech: {
     lang: 'id-ID',
-    announceCall,
-    announceRecall,
-    ticketNumber: spokenTicketNumber,
-    counterName: spokenCounterName,
   },
 } as const;
 
